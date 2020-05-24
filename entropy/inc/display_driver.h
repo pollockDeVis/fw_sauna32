@@ -10,8 +10,10 @@
 #define INC_DISPLAY_DRIVER_H_
 
 // ==========================================================
-// Define which spi bus to use TFT_VSPI_HOST or TFT_HSPI_HOST
-#define SPI_BUS TFT_HSPI_HOST
+
+#define SPI_BUS TFT_HSPI_HOST		// Define which spi bus to use TFT_VSPI_HOST or TFT_HSPI_HOST
+#define SPI_MAX_CLOCK_FREQ			8000000
+#define SPI_MAX_DATA_TRANSFER_SIZE  6*1024
 // ==========================================================
 void disp_header(char *info);
 void update_header(char *hdr, char *ftr);

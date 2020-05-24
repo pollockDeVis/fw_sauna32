@@ -17,6 +17,7 @@
 #include "esp_log.h"
 #include "freertos/task.h"
 
+static const char *TAG = "display_driver";
 //---------------------------------
 void disp_header(char *info)
 {
@@ -28,15 +29,15 @@ void disp_header(char *info)
 
     if (tft_width < 240) TFT_setFont(DEF_SMALL_FONT, NULL);
 	else TFT_setFont(DEFAULT_FONT, NULL);
-	TFT_fillRect(0, 0, tft_width-1, TFT_getfontheight()+8, tft_bg);
-	TFT_drawRect(0, 0, tft_width-1, TFT_getfontheight()+8, TFT_CYAN);
+	TFT_fillRect(0, 0, tft_width-1, TFT_getfontheight()+8, TFT_RED);
+	TFT_drawRect(0, 0, tft_width-1, TFT_getfontheight()+8, TFT_RED);
 
-	TFT_fillRect(0, tft_height-TFT_getfontheight()-9, tft_width-1, TFT_getfontheight()+8, tft_bg);
-	TFT_drawRect(0, tft_height-TFT_getfontheight()-9, tft_width-1, TFT_getfontheight()+8, TFT_CYAN);
+	TFT_fillRect(0, tft_height-TFT_getfontheight()-9, tft_width-1, TFT_getfontheight()+8, TFT_GREEN);
+	TFT_drawRect(0, tft_height-TFT_getfontheight()-9, tft_width-1, TFT_getfontheight()+8, TFT_GREEN);
 
 	TFT_print(info, CENTER, 4);
 	//_dispTime();
-	TFT_print("TEST", CENTER, tft_height-TFT_getfontheight()-5);
+	TFT_print("CELSIUS", CENTER, tft_height-TFT_getfontheight()-5);
 	tft_bg = TFT_BLACK;
 	TFT_setclipwin(0,TFT_getfontheight()+9, tft_width-1, tft_height-TFT_getfontheight()-10);
 }
@@ -77,22 +78,10 @@ void update_header(char *hdr, char *ftr)
 
 void display_driver_init()
 {
-	   // ========  PREPARE DISPLAY INITIALIZATION  =========
-
 	    esp_err_t ret;
 
-	    // === SET GLOBAL VARIABLES ==========================
-
-		// ===================================================
-		// ==== Set maximum spi clock for display read    ====
-		//      operations, function 'find_rd_speed()'    ====
-		//      can be used after display initialization  ====
-		tft_max_rdclock = 8000000;
-		// ===================================================
-
-	    // ====================================================================
+		tft_max_rdclock = SPI_MAX_CLOCK_FREQ;
 	    // === Pins MUST be initialized before SPI interface initialization ===
-	    // ====================================================================
 	    TFT_PinsInit();
 
 	    // ====  CONFIGURE SPI DEVICES(s)  ====================================================================================
@@ -105,31 +94,23 @@ void display_driver_init()
 	        .sclk_io_num=PIN_NUM_CLK,				// set SPI CLK pin
 	        .quadwp_io_num=-1,
 	        .quadhd_io_num=-1,
-			.max_transfer_sz = 6*1024,
+			.max_transfer_sz = SPI_MAX_DATA_TRANSFER_SIZE,
 	    };
 	    spi_lobo_device_interface_config_t devcfg={
-	        .clock_speed_hz=8000000,                // Initial clock out at 8 MHz
+	        .clock_speed_hz=SPI_MAX_CLOCK_FREQ,                // Initial clock out at 8 MHz
 	        .mode=0,                                // SPI mode 0
 	        .spics_io_num=-1,                       // we will use external CS pin
 			.spics_ext_io_num=PIN_NUM_CS,           // external CS pin
 			.flags=LB_SPI_DEVICE_HALFDUPLEX,        // ALWAYS SET  to HALF DUPLEX MODE!! for display spi
 	    };
 
-
-
 	    vTaskDelay(500 / portTICK_RATE_MS);
-		printf("\r\n==============================\r\n");
-	    printf("TFT display DEMO, LoBo 11/2017\r\n");
-		printf("==============================\r\n");
-	    printf("Pins used: miso=%d, mosi=%d, sck=%d, cs=%d\r\n", PIN_NUM_MISO, PIN_NUM_MOSI, PIN_NUM_CLK, PIN_NUM_CS);
-		printf("==============================\r\n\r\n");
 
-		// ==================================================================
 		// ==== Initialize the SPI bus and attach the LCD to the SPI bus ====
 
 		ret=spi_lobo_bus_add_device(SPI_BUS, &buscfg, &devcfg, &spi);
 	    assert(ret==ESP_OK);
-		printf("SPI: display device added to spi bus (%d)\r\n", SPI_BUS);
+		ESP_LOGI("TAG","SPI: display device added to spi bus (%d)\r\n", SPI_BUS);
 		tft_disp_spi = spi;
 
 		// ==== Test select/deselect ====
@@ -138,56 +119,54 @@ void display_driver_init()
 		ret = spi_lobo_device_deselect(spi);
 	    assert(ret==ESP_OK);
 
-		printf("SPI: attached display device, speed=%u\r\n", spi_lobo_get_speed(spi));
-		printf("SPI: bus uses native pins: %s\r\n", spi_lobo_uses_native_pins(spi) ? "true" : "false");
-
-
+	    ESP_LOGI("TAG","SPI: attached display device, speed=%u\r\n", spi_lobo_get_speed(spi));
+	    ESP_LOGI("TAG","SPI: bus uses native pins: %s\r\n", spi_lobo_uses_native_pins(spi) ? "true" : "false");
 		// ================================
 		// ==== Initialize the Display ====
 
-		printf("SPI: display init...\r\n");
+	    ESP_LOGI("TAG","SPI: display init...\r\n");
 		TFT_display_init();
+
 	#ifdef TFT_START_COLORS_INVERTED
 		TFT_invertDisplay(1);
 	#endif
-	    printf("OK\r\n");
+
 
 		// ---- Detect maximum read speed ----
 		tft_max_rdclock = find_rd_speed();
-		printf("SPI: Max rd speed = %u\r\n", tft_max_rdclock);
+		ESP_LOGI("TAG","SPI: Max rd speed = %u\r\n", tft_max_rdclock);
 
 	    // ==== Set SPI clock used for display operations ====
 		spi_lobo_set_speed(spi, DEFAULT_SPI_CLOCK);
-		printf("SPI: Changed speed to %u\r\n", spi_lobo_get_speed(spi));
-
-	    printf("\r\n---------------------\r\n");
-		printf("Graphics demo started\r\n");
-		printf("---------------------\r\n");
+		ESP_LOGI("TAG","SPI: Changed speed to %u\r\n", spi_lobo_get_speed(spi));
+		TFT_setGammaCurve(DEFAULT_GAMMA_CURVE);
 		TFT_setRotation(LANDSCAPE);
 		TFT_setGammaCurve(DEFAULT_GAMMA_CURVE);
+		TFT_resetclipwin();
 		disp_header("SAUNA32 DEMO");
-	//	update_header(NULL, tmp_buff);
-	//	TFT_saveClipWin();
-	//		TFT_resetclipwin();
-	  //  TFT_setGammaCurve(DEFAULT_GAMMA_CURVE);
-
-		//TFT_resetclipwin();
-
-
 
 }
 
 //=============
 void display_temperature(float _temp)
 {
+
+//	TFT_setFont(DEJAVU18_FONT, NULL);
+//
+//	int tempy1 = TFT_getfontheight() + 4;
+//	tft_fg = TFT_ORANGE;
+//	TFT_print("°C", BOTTOM, (tft_dispWin.y2-tft_dispWin.y1)/2 + tempy1);
+
 	char* tmp_buff[20];
-	sprintf(tmp_buff, "%0.2f °C", _temp);
+	sprintf(tmp_buff, "%0.1f", _temp);
 
 		TFT_setFont(FONT_7SEG, NULL);
-		set_7seg_font_atrib(12, 2, 1, TFT_DARKGREY);
-		int tempy = TFT_getfontheight() + 4;
-		tft_fg = TFT_ORANGE;
+		set_7seg_font_atrib(16, 3, 1, TFT_WHITE);
+		int tempy = TFT_getfontheight() - 25;
+		tft_fg = TFT_WHITE;
 		TFT_print(tmp_buff, CENTER, (tft_dispWin.y2-tft_dispWin.y1)/2 - tempy);
+//		ESP_LOGI("TAG", "Temp is %d ", tempy);
+//		ESP_LOGI("TAG", "Pos is %d ", (tft_dispWin.y2-tft_dispWin.y1)/2 );
 }
 
 void display_driver_demo_test(float _temp)
