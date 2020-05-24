@@ -1,37 +1,35 @@
-/**
- * @copyright (C) 2017 Melexis N.V.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- */
 #ifndef _MLX614_API_H_
 #define _MLX614_API_H_
 #include "esp_system.h"
+#include <stdint.h>
 
-    int MLX90614_DumpEE(uint8_t slaveAddr, uint16_t *eeData);
-    int MLX90614_GetTa(uint8_t slaveAddr, float *ta);
-    int MLX90614_GetTo(uint8_t slaveAddr, float *to);
-    int MLX90614_GetTo2(uint8_t slaveAddr, float *to2);
-    int MLX90614_GetIRdata1(uint8_t slaveAddr, uint16_t *ir1);
-    int MLX90614_GetIRdata2(uint8_t slaveAddr, uint16_t *ir2);
-    int MLX90614_GetEmissivity(uint8_t slaveAddr, float *emissivity);
-    int MLX90614_SetEmissivity(uint8_t slaveAddr, float value);
-    int MLX90614_GetFIR(uint8_t slaveAddr, uint8_t *fir);
-    int MLX90614_SetFIR(uint8_t slaveAddr, uint8_t value);
-    int MLX90614_GetIIR(uint8_t slaveAddr, uint8_t *iir);
-    int MLX90614_SetIIR(uint8_t slaveAddr, uint8_t value);
-    float MLX90614_TemperatureInFahrenheit(float temperature);
-    int16_t MLX90614_ConvertIRdata(uint16_t ir);
+// RAM
+#define MLX90614_RAWIR1 0x04
+#define MLX90614_RAWIR2 0x05
+#define MLX90614_TA 0x06
+#define MLX90614_TOBJ1 0x07
+#define MLX90614_TOBJ2 0x08
+// EEPROM
+#define MLX90614_TOMAX 0x20
+#define MLX90614_TOMIN 0x21
+#define MLX90614_PWMCTRL 0x22
+#define MLX90614_TARANGE 0x23
+#define MLX90614_EMISS 0x24
+#define MLX90614_CONFIG 0x25
+#define MLX90614_ADDR 0x2E
+#define MLX90614_ID1 0x3C
+#define MLX90614_ID2 0x3D
+#define MLX90614_ID3 0x3E
+#define MLX90614_ID4 0x3F
+#define MLX90614_MAX_TEMP 0x7FFF
+
+int MLX90614_DumpEE(uint8_t slaveAddr, uint16_t *eeData);
+int MLX90614_GetTa(uint8_t slaveAddr, float *ta);
+int MLX90614_GetTo(uint8_t slaveAddr, float *to);
+int MLX90614_GetTo2(uint8_t slaveAddr, float *to2);
+int MLX90614_GetEmissivity(uint8_t slaveAddr, float *emissivity);
+int MLX90614_SetEmissivity(uint8_t slaveAddr, float value);
+
     
 #endif
 

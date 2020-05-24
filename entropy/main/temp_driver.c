@@ -13,13 +13,26 @@
 #include "driver/gpio.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "esp_log.h"
+
+static const char *TAG = "temp_driver";
 
 void temp_driver_init()
 {
 
 
-	    MLX90614_SMBusInit(MLX90614_SDA_GPIO,  MLX90614_SCL_GPIO, 50000); // sda scl and 50kHz
+	    MLX90614_SMBusInit(MLX90614_SDA_GPIO,  MLX90614_SCL_GPIO, MLX90614_I2C_CLOCK_FREQUENCY); // sda scl and 50kHz
 	    vTaskDelay(1000/portTICK_RATE_MS);
+		float emissivity;
+		MLX90614_GetEmissivity(MLX90614_DEFAULT_ADDRESS, &emissivity);
+		ESP_LOGI(TAG, "Emissivity is %lf \r\n", emissivity) ;
+		/*
+		emissivity = 1.00;
+		int error = MLX90614_SetEmissivity(MLX90614_DEFAULT_ADDRESS, emissivity);
+		ESP_LOGI(TAG, "Error %d", error);
+		MLX90614_GetEmissivity(MLX90614_DEFAULT_ADDRESS, &emissivity);
+		ESP_LOGI(TAG, "After set Emissivity is %lf \r\n", emissivity) ;
+		*/
 }
 float temp_driver_get_obj_temp()
 {
@@ -28,6 +41,14 @@ float temp_driver_get_obj_temp()
 	return _to;
 
 }
+
+float temp_driver_get_obj_2_temp()
+{
+	float _to2 = 0;
+	MLX90614_GetTo2(MLX90614_DEFAULT_ADDRESS, &_to2);
+	return _to2;
+}
+
 float temp_driver_get_amb_temp()
 {
 	float _ta = 0;

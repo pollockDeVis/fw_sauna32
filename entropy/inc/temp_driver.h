@@ -13,10 +13,11 @@
 #define MLX90614_I2C_CLOCK_FREQUENCY	100000
 #define MLX90614_SDA_GPIO 				21 // sda for MLX90614
 #define MLX90614_SCL_GPIO 				22 // scl for MLX90614
-#define MLX90614_VCC_GPIO 				14 // vcc for MLX90614
+
 
 void temp_driver_init();
 float temp_driver_get_obj_temp();
+float temp_driver_get_obj_2_temp();
 float temp_driver_get_amb_temp();
-
+//factory emissivity 0.949996
 #endif /* INC_TEMP_DRIVER_H_ */
