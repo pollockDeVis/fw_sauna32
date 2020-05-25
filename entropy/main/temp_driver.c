@@ -26,13 +26,13 @@ void temp_driver_init()
 		float emissivity;
 		MLX90614_GetEmissivity(MLX90614_DEFAULT_ADDRESS, &emissivity);
 		ESP_LOGI(TAG, "Emissivity is %lf \r\n", emissivity) ;
-		/*
-		emissivity = 1.00;
+/*
+		emissivity = 0.95;
 		int error = MLX90614_SetEmissivity(MLX90614_DEFAULT_ADDRESS, emissivity);
 		ESP_LOGI(TAG, "Error %d", error);
 		MLX90614_GetEmissivity(MLX90614_DEFAULT_ADDRESS, &emissivity);
 		ESP_LOGI(TAG, "After set Emissivity is %lf \r\n", emissivity) ;
-		*/
+*/
 }
 float temp_driver_get_obj_temp()
 {

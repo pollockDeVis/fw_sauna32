@@ -18,26 +18,27 @@
 #include "freertos/task.h"
 
 static const char *TAG = "display_driver";
+//check this for UI design https://doc.embedded-wizard.de/getting-started-esp-wrover-kit
 //---------------------------------
 void disp_header(char *info)
 {
 	TFT_fillScreen(TFT_BLACK);
 	TFT_resetclipwin();
 
-	tft_fg = TFT_YELLOW;
-	tft_bg = (color_t){ 64, 64, 64 };
+	tft_fg = TFT_WHITE;
+	tft_bg = TFT_NAVY;//(color_t){ 64, 64, 64 };
 
     if (tft_width < 240) TFT_setFont(DEF_SMALL_FONT, NULL);
 	else TFT_setFont(DEFAULT_FONT, NULL);
-	TFT_fillRect(0, 0, tft_width-1, TFT_getfontheight()+8, TFT_RED);
-	TFT_drawRect(0, 0, tft_width-1, TFT_getfontheight()+8, TFT_RED);
+	TFT_fillRect(0, 0, tft_width-1, TFT_getfontheight()+8, TFT_NAVY);
+	TFT_drawRect(0, 0, tft_width-1, TFT_getfontheight()+8, TFT_NAVY);
 
-	TFT_fillRect(0, tft_height-TFT_getfontheight()-9, tft_width-1, TFT_getfontheight()+8, TFT_GREEN);
-	TFT_drawRect(0, tft_height-TFT_getfontheight()-9, tft_width-1, TFT_getfontheight()+8, TFT_GREEN);
+	TFT_fillRect(0, tft_height-TFT_getfontheight()-9, tft_width-1, TFT_getfontheight()+8, TFT_NAVY);
+	TFT_drawRect(0, tft_height-TFT_getfontheight()-9, tft_width-1, TFT_getfontheight()+8, TFT_NAVY);
 
-	TFT_print(info, CENTER, 4);
+	TFT_print("BLE CONNECTED", CENTER, 4);
 	//_dispTime();
-	TFT_print("CELSIUS", CENTER, tft_height-TFT_getfontheight()-5);
+	TFT_print(info, CENTER, tft_height-TFT_getfontheight()-5);
 	tft_bg = TFT_BLACK;
 	TFT_setclipwin(0,TFT_getfontheight()+9, tft_width-1, tft_height-TFT_getfontheight()-10);
 }
@@ -143,6 +144,7 @@ void display_driver_init()
 		TFT_setRotation(LANDSCAPE);
 		TFT_setGammaCurve(DEFAULT_GAMMA_CURVE);
 		TFT_resetclipwin();
+
 		disp_header("SAUNA32 DEMO");
 
 }
@@ -151,11 +153,11 @@ void display_driver_init()
 void display_temperature(float _temp)
 {
 
-//	TFT_setFont(DEJAVU18_FONT, NULL);
-//
-//	int tempy1 = TFT_getfontheight() + 4;
-//	tft_fg = TFT_ORANGE;
-//	TFT_print("°C", BOTTOM, (tft_dispWin.y2-tft_dispWin.y1)/2 + tempy1);
+	TFT_setFont(DEJAVU18_FONT, NULL);
+
+	int tempy1 = TFT_getfontheight() - 40;
+	tft_fg = TFT_WHITE;
+	TFT_print("                       C", CENTER, (tft_dispWin.y2-tft_dispWin.y1)/2 + tempy1);
 
 	char* tmp_buff[20];
 	sprintf(tmp_buff, "%0.1f", _temp);
