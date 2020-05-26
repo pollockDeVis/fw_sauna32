@@ -19,6 +19,7 @@
 
 static const char *TAG = "display_driver";
 //check this for UI design https://doc.embedded-wizard.de/getting-started-esp-wrover-kit
+//ESP Camera Module with QR code scanning: https://www.hackster.io/news/using-a-camera-with-the-esp32-9d6994b34a2b
 //---------------------------------
 void disp_header(char *info)
 {
