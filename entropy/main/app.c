@@ -8,6 +8,7 @@
 #include "esp_log.h"
 #include "nvs_flash.h"
 #include "ble_manager.h"
+#include "sensor_filter.h"
 
 static const char *TAG = "app";
 
@@ -29,7 +30,15 @@ void app_main()
 
 	display_driver_init();
 	float to = 0, to2 = 0, ta = 0;
-
+	ringBuffParams *tmp;
+	tmp = sensor_filter_init(100);
+	for(uint8_t i = 0 ; i <= 100; ++i)
+	{
+		sensor_filter_put_raw_data(tmp, temp_driver_get_obj_temp());
+		ESP_LOGI("TAG", "%d \r\n", i) ;
+	}
+	float avg = sensor_filter_get_filtered_data(tmp);
+	ESP_LOGI("TAG", "Average is %lf \r\n", avg) ;
 
 	  while (1)
 	    {
