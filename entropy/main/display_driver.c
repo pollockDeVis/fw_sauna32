@@ -55,8 +55,8 @@ void update_header(char *hdr, char *ftr)
 	Font curr_font = tft_cfont;
 	last_bg = tft_bg;
 	last_fg = tft_fg;
-	tft_fg = TFT_YELLOW;
-	tft_bg = (color_t){ 64, 64, 64 };
+	tft_fg = TFT_WHITE;
+	tft_bg = TFT_RED;
     if (tft_width < 240) TFT_setFont(DEF_SMALL_FONT, NULL);
 	else TFT_setFont(DEFAULT_FONT, NULL);
 
@@ -67,7 +67,7 @@ void update_header(char *hdr, char *ftr)
 
 	if (ftr) {
 		TFT_fillRect(1, tft_height-TFT_getfontheight()-8, tft_width-3, TFT_getfontheight()+6, tft_bg);
-		if (strlen(ftr) == 0) TFT_print("FOOTER", CENTER, tft_height-TFT_getfontheight()-5);
+		if (strlen(ftr) == 0) TFT_print(ftr, CENTER, tft_height-TFT_getfontheight()-5);
 		else TFT_print(ftr, CENTER, tft_height-TFT_getfontheight()-5);
 	}
 
@@ -143,10 +143,20 @@ void display_driver_init()
 		ESP_LOGI("TAG","SPI: Changed speed to %u\r\n", spi_lobo_get_speed(spi));
 		TFT_setGammaCurve(DEFAULT_GAMMA_CURVE);
 		TFT_setRotation(LANDSCAPE);
-		TFT_setGammaCurve(DEFAULT_GAMMA_CURVE);
 		TFT_resetclipwin();
 
+		TFT_setFont(DEJAVU24_FONT, NULL); //DEJAVU18_FONT
+			int tempy = TFT_getfontheight() + 4;
+			tft_fg = TFT_ORANGE;
+			TFT_print("Sauna32 Lite", CENTER, (tft_dispWin.y2-tft_dispWin.y1)/2 - tempy);
+			TFT_setFont(UBUNTU16_FONT, NULL);
+			tft_fg = TFT_CYAN;
+			TFT_print("Powered by", CENTER, LASTY+tempy+2);
+			TFT_print("Digital Forest", CENTER, LASTY+tempy);
+			vTaskDelay(5000 / portTICK_RATE_MS);
 		disp_header("SAUNA32 DEMO");
+		vTaskDelay(5000 / portTICK_RATE_MS);
+		update_header("BLE DISCONNECTED", "SAUNA32");
 
 }
 
