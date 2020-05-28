@@ -30,24 +30,31 @@ void app_main()
 
 	display_driver_init();
 	float to = 0, to2 = 0, ta = 0;
-	ringBuffParams *tmp;
-	tmp = sensor_filter_init(100);
-	for(uint8_t i = 0 ; i <= 100; ++i)
-	{
-		sensor_filter_put_raw_data(tmp, temp_driver_get_obj_temp());
-		ESP_LOGI("TAG", "%d \r\n", i) ;
-	}
-	float avg = sensor_filter_get_filtered_data(tmp);
-	ESP_LOGI("TAG", "Average is %lf \r\n", avg) ;
+	float last_avg = 0;
+	uint8_t sample_size = 100;
 
 	  while (1)
 	    {
-			to = temp_driver_get_obj_temp();
+			//to = temp_driver_get_obj_temp();
 			ta = temp_driver_get_amb_temp();
 			to2 = temp_driver_get_obj_2_temp();
+			ringBuffParams *tmp;
+			tmp = sensor_filter_init(sample_size);
+
+			for(uint8_t i = 0 ; i <= sample_size; ++i)
+			{
+				to = temp_driver_get_obj_temp();
+				sensor_filter_put_raw_data(tmp, to);
+				//ESP_LOGI("TAG", "%d \r\n", i) ;
+				vTaskDelay(10 / portTICK_RATE_MS);
+			}
+			float avg = sensor_filter_get_filtered_data(tmp);
+			ESP_LOGI("TAG", "Average is %lf \r\n", avg) ;
+			ESP_LOGI("TAG", "Gradient is %lf \r\n", avg-last_avg ) ;
+			last_avg = avg;
 		  ESP_LOGI("TAG", "log:%lf %lf %lf \r\n", to, to2, ta) ;
-		  display_temperature(to);
-		  vTaskDelay(100 / portTICK_RATE_MS);
+		  display_temperature(avg);
+		 // vTaskDelay(100 / portTICK_RATE_MS);
 	    }
 
 }

@@ -6,6 +6,10 @@ set(SOURCES
 "temp_driver.c"
 "ble_manager.c"
 "sensor_filter.c"
+"custom_list_iterator.c"
+"custom_list_node.c"
+"custom_list.c"
+"MessageQueue.c"
 )
 idf_component_register(
         SRCS ${SOURCES}
