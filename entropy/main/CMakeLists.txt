@@ -10,6 +10,9 @@ set(SOURCES
 "custom_list_node.c"
 "custom_list.c"
 "MessageQueue.c"
+"buzzer.c"
+"hmi_controller.c"
+"sensor_manager.c"
 )
 idf_component_register(
         SRCS ${SOURCES}

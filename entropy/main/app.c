@@ -9,6 +9,7 @@
 #include "nvs_flash.h"
 #include "ble_manager.h"
 #include "sensor_filter.h"
+#include "buzzer.h"
 
 #define FEVER_TEMPERATURE_THRESHOLD     37.3
 
@@ -61,7 +62,7 @@ void app_main()
 	  display_generic_message();
 	  vTaskDelay(2000 / portTICK_RATE_MS);
 	  display_refresh();
-
+	  buzzer_init();
 	  while (1)
 	    {
 			to = temp_driver_get_obj_temp();
