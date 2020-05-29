@@ -5,6 +5,7 @@ set(SOURCES
 "MLX90614_API.c"
 "temp_driver.c"
 "ble_manager.c"
+"heartBeat.c"
 )
 idf_component_register(
         SRCS ${SOURCES}
