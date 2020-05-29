@@ -16,18 +16,20 @@
 #include "tft.h"
 #include "esp_log.h"
 #include "freertos/task.h"
+#include "esp_ota_ops.h"
 
 static const char *TAG = "display_driver";
+
 //check this for UI design https://doc.embedded-wizard.de/getting-started-esp-wrover-kit
 //ESP Camera Module with QR code scanning: https://www.hackster.io/news/using-a-camera-with-the-esp32-9d6994b34a2b
 //---------------------------------
-void disp_header(char *info)
+void display_driver_default_header(char *info)
 {
 	TFT_fillScreen(TFT_BLACK);
 	TFT_resetclipwin();
 
 	tft_fg = TFT_WHITE;
-	tft_bg = TFT_NAVY;//(color_t){ 64, 64, 64 };
+	tft_bg = TFT_NAVY;
 
     if (tft_width < 240) TFT_setFont(DEF_SMALL_FONT, NULL);
 	else TFT_setFont(DEFAULT_FONT, NULL);
@@ -38,42 +40,39 @@ void disp_header(char *info)
 	TFT_drawRect(0, tft_height-TFT_getfontheight()-9, tft_width-1, TFT_getfontheight()+8, TFT_NAVY);
 
 	TFT_print("BLE CONNECTED", CENTER, 4);
-	//_dispTime();
 	TFT_print(info, CENTER, tft_height-TFT_getfontheight()-5);
 	tft_bg = TFT_BLACK;
 	TFT_setclipwin(0,TFT_getfontheight()+9, tft_width-1, tft_height-TFT_getfontheight()-10);
 }
 
 //---------------------------------------------
-void update_header(char *hdr, char *ftr)
+void display_driver_error_header(char *hdr, char *ftr)
 {
-	color_t last_fg, last_bg;
+
 
 	TFT_saveClipWin();
 	TFT_resetclipwin();
 
-	Font curr_font = tft_cfont;
-	last_bg = tft_bg;
-	last_fg = tft_fg;
+
 	tft_fg = TFT_WHITE;
 	tft_bg = TFT_RED;
     if (tft_width < 240) TFT_setFont(DEF_SMALL_FONT, NULL);
 	else TFT_setFont(DEFAULT_FONT, NULL);
 
 	if (hdr) {
-		TFT_fillRect(1, 1, tft_width-3, TFT_getfontheight()+6, tft_bg);
+		TFT_fillRect(1, 1, tft_width-3, TFT_getfontheight()+6, TFT_RED);
+		TFT_drawRect(1, 1, tft_width-3, TFT_getfontheight()+6, TFT_RED);
 		TFT_print(hdr, CENTER, 4);
 	}
 
 	if (ftr) {
-		TFT_fillRect(1, tft_height-TFT_getfontheight()-8, tft_width-3, TFT_getfontheight()+6, tft_bg);
+		TFT_fillRect(1, tft_height-TFT_getfontheight()-8, tft_width-3, TFT_getfontheight()+6, TFT_RED);
+		TFT_drawRect(1, tft_height-TFT_getfontheight()-8, tft_width-3, TFT_getfontheight()+6, TFT_RED);
 		if (strlen(ftr) == 0) TFT_print(ftr, CENTER, tft_height-TFT_getfontheight()-5);
 		else TFT_print(ftr, CENTER, tft_height-TFT_getfontheight()-5);
 	}
 
-	tft_cfont = curr_font;
-	tft_fg = last_fg;
-	tft_bg = last_bg;
+
 
 	TFT_restoreClipWin();
 }
@@ -82,11 +81,8 @@ void display_driver_init()
 {
 	    esp_err_t ret;
 
-		tft_max_rdclock = SPI_MAX_CLOCK_FREQ;
-	    // === Pins MUST be initialized before SPI interface initialization ===
+		tft_max_rdclock = SPI_MAX_CLOCK_FREQ; 	    //Pins MUST be initialized before SPI interface initialization
 	    TFT_PinsInit();
-
-	    // ====  CONFIGURE SPI DEVICES(s)  ====================================================================================
 
 	    spi_lobo_device_handle_t spi;
 
@@ -98,6 +94,7 @@ void display_driver_init()
 	        .quadhd_io_num=-1,
 			.max_transfer_sz = SPI_MAX_DATA_TRANSFER_SIZE,
 	    };
+
 	    spi_lobo_device_interface_config_t devcfg={
 	        .clock_speed_hz=SPI_MAX_CLOCK_FREQ,                // Initial clock out at 8 MHz
 	        .mode=0,                                // SPI mode 0
@@ -109,7 +106,6 @@ void display_driver_init()
 	    vTaskDelay(500 / portTICK_RATE_MS);
 
 		// ==== Initialize the SPI bus and attach the LCD to the SPI bus ====
-
 		ret=spi_lobo_bus_add_device(SPI_BUS, &buscfg, &devcfg, &spi);
 	    assert(ret==ESP_OK);
 		ESP_LOGI("TAG","SPI: display device added to spi bus (%d)\r\n", SPI_BUS);
@@ -123,9 +119,8 @@ void display_driver_init()
 
 	    ESP_LOGI("TAG","SPI: attached display device, speed=%u\r\n", spi_lobo_get_speed(spi));
 	    ESP_LOGI("TAG","SPI: bus uses native pins: %s\r\n", spi_lobo_uses_native_pins(spi) ? "true" : "false");
-		// ================================
-		// ==== Initialize the Display ====
 
+		// ==== Initialize the Display ====
 	    ESP_LOGI("TAG","SPI: display init...\r\n");
 		TFT_display_init();
 
@@ -134,9 +129,9 @@ void display_driver_init()
 	#endif
 
 
-		// ---- Detect maximum read speed ----
-		tft_max_rdclock = find_rd_speed();
-		ESP_LOGI("TAG","SPI: Max rd speed = %u\r\n", tft_max_rdclock);
+//		// ---- Detect maximum read speed ----
+//		tft_max_rdclock = find_rd_speed();
+//		ESP_LOGI("TAG","SPI: Max rd speed = %u\r\n", tft_max_rdclock);
 
 	    // ==== Set SPI clock used for display operations ====
 		spi_lobo_set_speed(spi, DEFAULT_SPI_CLOCK);
@@ -145,76 +140,75 @@ void display_driver_init()
 		TFT_setRotation(LANDSCAPE);
 		TFT_resetclipwin();
 
-		TFT_setFont(DEJAVU24_FONT, NULL); //DEJAVU18_FONT
-			int tempy = TFT_getfontheight() + 4;
-			tft_fg = TFT_ORANGE;
-			TFT_print("Sauna32 Lite", CENTER, (tft_dispWin.y2-tft_dispWin.y1)/2 - tempy);
-			TFT_setFont(UBUNTU16_FONT, NULL);
-			tft_fg = TFT_CYAN;
-			TFT_print("Powered by", CENTER, LASTY+tempy+2);
-			TFT_print("Digital Forest", CENTER, LASTY+tempy);
-			vTaskDelay(5000 / portTICK_RATE_MS);
-		disp_header("SAUNA32 DEMO");
-		vTaskDelay(5000 / portTICK_RATE_MS);
-		update_header("BLE DISCONNECTED", "SAUNA32");
+
+
+}
+
+void display_start_page()
+{
+	TFT_setFont(DEJAVU24_FONT, NULL); //DEJAVU18_FONT
+		int tempy = TFT_getfontheight() + 4;
+		tft_fg = TFT_ORANGE;
+		TFT_print("Sauna32 Lite", CENTER, (tft_dispWin.y2-tft_dispWin.y1)/2 - tempy);
+		ESP_LOGI("TAG","offset %d", (tft_dispWin.y2-tft_dispWin.y1)/2 - tempy);
+		ESP_LOGI("TAG","tempy %d", tempy);
+
+		TFT_setFont(UBUNTU16_FONT, NULL);
+		tft_fg = TFT_CYAN;
+		TFT_print("Powered by", CENTER, (tft_dispWin.y2-tft_dispWin.y1)/2 + tempy-20);
+		TFT_print("Digital Forest", CENTER, (tft_dispWin.y2-tft_dispWin.y1)/2 + tempy);
+		vTaskDelay(2000 / portTICK_RATE_MS);
+		esp_app_desc_t *app_info = esp_ota_get_app_description();
+		char* print_buff[20];
+		sprintf(print_buff, "sauna32 %s", app_info->version);
+		display_driver_default_header(print_buff);
 
 }
 
 //=============
-void display_temperature(float _temp)
+void display_temperature(float _temp, float _threshold)
 {
+
+	color_t tempFontColour = (_temp>_threshold) ? TFT_RED:TFT_WHITE;
 
 	TFT_setFont(DEJAVU18_FONT, NULL);
 
 	int tempy1 = TFT_getfontheight() - 40;
-	tft_fg = TFT_WHITE;
+	tft_fg = tempFontColour;
 	TFT_print("                       C", CENTER, (tft_dispWin.y2-tft_dispWin.y1)/2 + tempy1);
 
 	char* tmp_buff[20];
-	sprintf(tmp_buff, "%0.1f", _temp);
+	sprintf(tmp_buff, "%2.1f", _temp);
 
 		TFT_setFont(FONT_7SEG, NULL);
-		set_7seg_font_atrib(16, 3, 1, TFT_WHITE);
+		set_7seg_font_atrib(16, 3, 1, tempFontColour);
 		int tempy = TFT_getfontheight() - 25;
-		tft_fg = TFT_WHITE;
+		tft_fg = tempFontColour;
 		TFT_print(tmp_buff, CENTER, (tft_dispWin.y2-tft_dispWin.y1)/2 - tempy);
-//		ESP_LOGI("TAG", "Temp is %d ", tempy);
-//		ESP_LOGI("TAG", "Pos is %d ", (tft_dispWin.y2-tft_dispWin.y1)/2 );
+
+
 }
 
-void display_driver_demo_test(float _temp)
+void display_generic_message()
 {
-	disp_header("ESP32 TFT DEMO");
-	TFT_setFont(TOONEY32_FONT, NULL);
-
-	int tempy = TFT_getfontheight() + 4;
-	tft_fg = TFT_ORANGE;
-	TFT_print("Sauna32", CENTER, (tft_dispWin.y2-tft_dispWin.y1)/2 - tempy);
-
-	//TFT_resetclipwin();
-	vTaskDelay(5000 / portTICK_RATE_MS);
-	disp_header("7-SEG FONT DEMO");
 
 
-		char* tmp_buff[20];
-		tft_fg = TFT_ORANGE;
-		sprintf(tmp_buff, "%0.2f °C", _temp);
-		TFT_setFont(FONT_7SEG, NULL);
+	TFT_setFont(UBUNTU16_FONT, NULL); //DEJAVU18_FONT
 
-        if ((tft_width < 240) || (tft_height < 240)) {
-        	set_7seg_font_atrib(12, 2, 1, TFT_DARKGREY);
-        	ESP_LOGI("TEST", "Executing 1");
+			int tempy = TFT_getfontheight() - 25;
+			tft_fg = TFT_WHITE;
+			char* tmp_buff =  "Measuring Temperature";
+			//sprintf(tmp_buff,);
+			TFT_print(tmp_buff, CENTER, (tft_dispWin.y2-tft_dispWin.y1)/2 - tempy - 20);
 
-	}
-		else {
-			set_7seg_font_atrib(12, 2, 1, TFT_DARKGREY);
-			ESP_LOGI("TEST", "Executing 2");
-		}
-		//TFT_clearStringRect(12, y, tmp_buff);
-        int offset = 25;
-        int y = ((tft_dispWin.y2-tft_dispWin.y1)-TFT_getfontheight()-2) - offset;
-        ESP_LOGI("TEST","the offset value for the font is %d", (tft_dispWin.y2-tft_dispWin.y1)-TFT_getfontheight()-2); //63 //49 for font size 12
-        ESP_LOGI("TEST","%d\r\n",y);
-        TFT_print(tmp_buff, CENTER, y);
+}
+
+void display_refresh()
+{
+	TFT_fillScreen(TFT_BLACK);
+	TFT_resetclipwin();
+	//check state
+
+	display_driver_default_header("test");
 }
 

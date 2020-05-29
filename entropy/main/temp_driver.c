@@ -22,7 +22,7 @@ void temp_driver_init()
 
 
 	    MLX90614_SMBusInit(MLX90614_SDA_GPIO,  MLX90614_SCL_GPIO, MLX90614_I2C_CLOCK_FREQUENCY); // sda scl and 50kHz
-	    vTaskDelay(1000/portTICK_RATE_MS);
+	    vTaskDelay(100/portTICK_RATE_MS);
 		float emissivity;
 		MLX90614_GetEmissivity(MLX90614_DEFAULT_ADDRESS, &emissivity);
 		ESP_LOGI(TAG, "Emissivity is %lf \r\n", emissivity) ;
@@ -38,6 +38,9 @@ float temp_driver_get_obj_temp()
 {
 	float _to = 0;
 	MLX90614_GetTo(MLX90614_DEFAULT_ADDRESS, &_to);
+	if(_to < MINIMUM_MEASURED_TEMP) _to = MINIMUM_MEASURED_TEMP;
+	else if (_to > MAXIMUM_MEASURED_TEMP) _to = MAXIMUM_MEASURED_TEMP;
+
 	return _to;
 
 }

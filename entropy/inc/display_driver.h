@@ -15,9 +15,11 @@
 #define SPI_MAX_CLOCK_FREQ			8000000
 #define SPI_MAX_DATA_TRANSFER_SIZE  6*1024
 // ==========================================================
-void disp_header(char *info);
-void update_header(char *hdr, char *ftr);
+void display_driver_default_header(char *info);
+void display_driver_error_header(char *hdr, char *ftr);
 void display_driver_init();
-void display_driver_demo_test(float _temp);
-void display_temperature(float _temp);
+void display_temperature(float _temp, float _threshold);
+void display_start_page(void);
+void display_refresh(void);
+void display_generic_message(void);
 #endif /* INC_DISPLAY_DRIVER_H_ */
