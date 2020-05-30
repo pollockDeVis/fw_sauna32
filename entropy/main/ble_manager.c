@@ -150,7 +150,7 @@ static struct gatts_profile_inst heart_rate_profile_tab[PROFILE_NUM] = {
 
 /* Service */
 static const uint16_t GATTS_SERVICE_UUID_TEST      = 0x1809;
-static const uint16_t GATTS_CHAR_UUID_TEST_A       = 0x2A1F;
+static const uint16_t GATTS_CHAR_UUID_TEST_A       = 0x2A1C;
 static const uint16_t GATTS_CHAR_UUID_TEST_B       = 0x2A6E;
 static const uint16_t GATTS_CHAR_UUID_TEST_C       = 0x2A3C; //0x2A1F
 
@@ -161,7 +161,7 @@ static const uint8_t char_prop_read                =  ESP_GATT_CHAR_PROP_BIT_REA
 static const uint8_t char_prop_write               = ESP_GATT_CHAR_PROP_BIT_WRITE;
 static const uint8_t char_prop_read_write_notify   = ESP_GATT_CHAR_PROP_BIT_WRITE | ESP_GATT_CHAR_PROP_BIT_READ | ESP_GATT_CHAR_PROP_BIT_NOTIFY;
 static const uint8_t heart_measurement_ccc[2]      = {0x00, 0x00};
-static const uint8_t char_value[4]                 = {0x11, 0x22, 0x33, 0x44};
+static const uint8_t char_value[5]                 = {0x00, 0xe0, 0xf6, 0x32, 0xFB};//; //{0x32, 0xF6, 0xE0, 0x00}
 
 
 /* Full Database Description - Used to add attributes into the database */

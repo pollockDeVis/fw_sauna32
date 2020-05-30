@@ -37,7 +37,7 @@ void app_main()
 	float to = 0, to2 = 0, ta = 0;
 
 	//test stupidity
-	float ave_temp = 33.4;
+	float ave_temp = 38.4;
 	uint8_t temp_measurement[4] = { '\0' }; //Tempearature is in Centigrade unit
 	        uint8_t BLE_measurement[5] = { '\0' }; //Tempearature is in Centigrade unit
 	        BLE_measurement[0] = 0x00;
@@ -45,7 +45,7 @@ void app_main()
 	        float2IEEE11073(ave_temp, temp_measurement);
 
 	        for (uint8_t xx = 0; xx < 4; xx++) BLE_measurement[xx+1] = temp_measurement[xx];
-	        for (uint8_t xx = 0; xx < 4; xx++)
+	        for (uint8_t xx = 0; xx < 5; xx++)
 	        {
 	        	ESP_LOGI(TAG, "BLE bytes: %x\r\n",BLE_measurement[xx]);
 	        }
