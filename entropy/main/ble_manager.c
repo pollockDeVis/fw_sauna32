@@ -17,6 +17,8 @@
 #define GAP_SERVICE_UUID   0x1800
 #define GATTS_NUM_HANDLE   4
 
+#define GAP_SERVICE_ID  0
+
 static const char *TAG = __FILE__;
 static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param);
 static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param);
@@ -33,45 +35,6 @@ static uint8_t adv_service_uuid128[32] = {
     0xfb, 0x34, 0x9b, 0x5f, 0x80, 0x00, 0x00, 0x80, 0x00, 0x10, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00,
 };
 
-static esp_ble_adv_data_t default_adv_data = {
-        .set_scan_rsp = false,
-        .include_name = true,
-        .include_txpower = true,
-        .min_interval = 0x0006,
-        .max_interval = 0x0010,
-        .appearance = 0x00,
-        .manufacturer_len = 0, //TEST_MANUFACTURER_DATA_LEN,
-        .p_manufacturer_data =  NULL, //&test_manufacturer[0],
-        .service_data_len = 0,
-        .p_service_data = NULL,
-        .service_uuid_len = 32,
-        .p_service_uuid = adv_service_uuid128,
-        .flag = (ESP_BLE_ADV_FLAG_GEN_DISC | ESP_BLE_ADV_FLAG_BREDR_NOT_SPT),
-};
-
-static esp_ble_adv_params_t default_adv_params = {
-        .adv_int_min        = 0x20,
-        .adv_int_max        = 0x40,
-        .adv_type           = ADV_TYPE_IND,
-        .own_addr_type      = BLE_ADDR_TYPE_PUBLIC,
-        .channel_map        = ADV_CHNL_ALL,
-        .adv_filter_policy = ADV_FILTER_ALLOW_SCAN_ANY_CON_ANY,
-};
-
- // scan response data
-static esp_ble_adv_data_t default_scan_rsp_data = {
-        .set_scan_rsp = true,
-        .include_name = true,
-        .include_txpower = true,
-        .appearance = 0x00,
-        .manufacturer_len = 0, //TEST_MANUFACTURER_DATA_LEN,
-        .p_manufacturer_data =  NULL, //&test_manufacturer[0],
-        .service_data_len = 0,
-        .p_service_data = NULL,
-        .service_uuid_len = sizeof(adv_service_uuid128),
-        .p_service_uuid = adv_service_uuid128,
-        .flag = (ESP_BLE_ADV_FLAG_GEN_DISC | ESP_BLE_ADV_FLAG_BREDR_NOT_SPT),
-};
 
 //gatt
 
@@ -124,38 +87,67 @@ void ble_manager_init()
         ESP_LOGE(TAG, "set local  MTU failed, error code = %x", local_mtu_ret);
     }
     ESP_LOGI(TAG, "Local mtu set to 512");
-    ret = esp_ble_gatts_app_register(0);
+    ret = esp_ble_gatts_app_register(GAP_SERVICE_ID);
     if (ret){
         ESP_LOGE(TAG, "gatts app register error, error code = %x", ret);
         return;
     }
     ESP_LOGI(TAG, "Register to gap service");
-    // ret = esp_ble_gatts_app_register(ESP_APP_ID);
-    // if (ret){
-    //     ESP_LOGE(TAG, "gatts app register error, error code = %x", ret);
-    //     return;
-    // }
-    // ESP_LOGI(TAG, "GATT app registered");
     
     
 }
 
 esp_ble_adv_params_t* ble_manager_getDefaultAdvertiseParam(void)
 {
-    return &default_adv_params;
+    esp_ble_adv_params_t * default_adv_params = (esp_ble_adv_params_t*) malloc(sizeof(esp_ble_adv_params_t));
+    memset((void*)default_adv_params,0,sizeof(esp_ble_adv_params_t));
+    default_adv_params->adv_int_min        = 0x20;
+    default_adv_params->adv_int_max        = 0x40;
+    default_adv_params->adv_type           = ADV_TYPE_IND;
+    default_adv_params->own_addr_type      = BLE_ADDR_TYPE_PUBLIC;
+    default_adv_params->channel_map        = ADV_CHNL_ALL;
+    default_adv_params->adv_filter_policy  = ADV_FILTER_ALLOW_SCAN_ANY_CON_ANY;
+    return default_adv_params;
 }
 
 esp_ble_adv_data_t* ble_manager_getDefaultAdvRespData(void)
 {
-   
-    return &default_scan_rsp_data;
+    esp_ble_adv_data_t *default_scan_rsp_data = (esp_ble_adv_data_t*) malloc(sizeof(esp_ble_adv_data_t));
+    memset((void*)default_scan_rsp_data,0,sizeof(esp_ble_adv_data_t));
+    default_scan_rsp_data->set_scan_rsp = true;
+    default_scan_rsp_data->include_name = true;
+    default_scan_rsp_data->include_txpower = true;
+    default_scan_rsp_data->appearance = 0x00;
+    default_scan_rsp_data->manufacturer_len = 0; //TEST_MANUFACTURER_DATA_LEN,
+    default_scan_rsp_data->p_manufacturer_data =  NULL; //&test_manufacturer[0],
+    default_scan_rsp_data->service_data_len = 0;
+    default_scan_rsp_data->p_service_data = NULL;
+    default_scan_rsp_data->service_uuid_len = sizeof(adv_service_uuid128);
+    default_scan_rsp_data->p_service_uuid = adv_service_uuid128;
+    default_scan_rsp_data->flag = (ESP_BLE_ADV_FLAG_GEN_DISC | ESP_BLE_ADV_FLAG_BREDR_NOT_SPT);
+
+    return default_scan_rsp_data;
 }
 
 esp_ble_adv_data_t* ble_manager_getDefaultAdvData(void)
 {
+    esp_ble_adv_data_t* default_adv_data = (esp_ble_adv_data_t*) malloc(sizeof(esp_ble_adv_data_t));
+    memset((void*)default_adv_data,0,sizeof(esp_ble_adv_data_t));
+    default_adv_data->set_scan_rsp = false;
+    default_adv_data->include_name = true;
+    default_adv_data->include_txpower = true;
+    default_adv_data->min_interval = 0x0006;
+    default_adv_data->max_interval = 0x0010;
+    default_adv_data->appearance = 0x00;
+    default_adv_data->manufacturer_len = 0; //TEST_MANUFACTURER_DATA_LEN,
+    default_adv_data->p_manufacturer_data =  NULL; //&test_manufacturer[0],
+    default_adv_data->service_data_len = 0;
+    default_adv_data->p_service_data = NULL;
+    default_adv_data->service_uuid_len = 32;
+    default_adv_data->p_service_uuid = adv_service_uuid128;
+    default_adv_data->flag = (ESP_BLE_ADV_FLAG_GEN_DISC | ESP_BLE_ADV_FLAG_BREDR_NOT_SPT);
     
-
-    return &default_adv_data;
+    return default_adv_data;
 }
 
 esp_err_t ble_manager_setDeviceName(const char* deviceName)
