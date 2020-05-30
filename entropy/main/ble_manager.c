@@ -49,7 +49,7 @@ typedef struct {
 
 static prepare_type_env_t prepare_write_env;
 
-#define CONFIG_SET_RAW_ADV_DATA
+//#define CONFIG_SET_RAW_ADV_DATA
 
 #ifdef CONFIG_SET_RAW_ADV_DATA
 static uint8_t raw_adv_data[] = {

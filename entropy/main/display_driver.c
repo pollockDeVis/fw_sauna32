@@ -103,7 +103,7 @@ void display_driver_init()
 			.flags=LB_SPI_DEVICE_HALFDUPLEX,        // ALWAYS SET  to HALF DUPLEX MODE!! for display spi
 	    };
 
-	    vTaskDelay(500 / portTICK_RATE_MS);
+	    //vTaskDelay(500 / portTICK_RATE_MS);
 
 		// ==== Initialize the SPI bus and attach the LCD to the SPI bus ====
 		ret=spi_lobo_bus_add_device(SPI_BUS, &buscfg, &devcfg, &spi);

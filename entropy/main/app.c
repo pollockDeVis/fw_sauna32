@@ -27,67 +27,15 @@ void app_main()
         ESP_ERROR_CHECK(nvs_flash_erase());
         ret = nvs_flash_init();
     }
-
     ESP_ERROR_CHECK( ret );
     ble_manager_init();
 	temp_driver_init();
 	display_driver_init();
 	display_start_page();
-	vTaskDelay(2000 / portTICK_RATE_MS);
-	float to = 0, to2 = 0, ta = 0;
 
-	//test stupidity
-	float ave_temp = 38.4;
-	uint8_t temp_measurement[4] = { '\0' }; //Tempearature is in Centigrade unit
-	        uint8_t BLE_measurement[5] = { '\0' }; //Tempearature is in Centigrade unit
-	        BLE_measurement[0] = 0x00;
-
-	        float2IEEE11073(ave_temp, temp_measurement);
-
-	        for (uint8_t xx = 0; xx < 4; xx++) BLE_measurement[xx+1] = temp_measurement[xx];
-	        for (uint8_t xx = 0; xx < 5; xx++)
-	        {
-	        	ESP_LOGI(TAG, "BLE bytes: %x\r\n",BLE_measurement[xx]);
-	        }
-	//test stupidity
-
-	//float last_avg = 0;
-	uint8_t sample_size = 100;
-
-	//			ringBuffParams *tmp;
-	//			tmp = sensor_filter_init(sample_size);
-	//
-	//			for(uint8_t i = 0 ; i <= sample_size; ++i)
-	//			{
-	//				to = temp_driver_get_obj_temp();
-	//				sensor_filter_put_raw_data(tmp, to);
-	//				//ESP_LOGI("TAG", "%d \r\n", i) ;
-	//				vTaskDelay(10 / portTICK_RATE_MS);
-	//			}
-	//			float avg = sensor_filter_get_filtered_data(tmp);
-	//			ESP_LOGI("TAG", "Average is %lf \r\n", avg) ;
-	//			ESP_LOGI("TAG", "Gradient is %lf \r\n", avg-last_avg ) ;
-	//			last_avg = avg;
-	  to = temp_driver_get_obj_temp();
-	  display_temperature(to, FEVER_TEMPERATURE_THRESHOLD);
-	  vTaskDelay(2000 / portTICK_RATE_MS);
-	  display_refresh();
-	  vTaskDelay(2000 / portTICK_RATE_MS);
-	  display_driver_error_header("BLE DISCONNECTED", "ERROR");
-	  vTaskDelay(2000 / portTICK_RATE_MS);
-	  display_refresh();
-	  display_generic_message();
-	  vTaskDelay(2000 / portTICK_RATE_MS);
-	  display_refresh();
-	  buzzer_init();
 	  while (1)
 	    {
-			to = temp_driver_get_obj_temp();
-			ta = temp_driver_get_amb_temp();
-			to2 = temp_driver_get_obj_2_temp();
-		  ESP_LOGI("TAG", "log:%lf %lf %lf \r\n", to, to2, ta) ;
-		  display_temperature(to, FEVER_TEMPERATURE_THRESHOLD);
-		  vTaskDelay(100 / portTICK_RATE_MS);
+		  vTaskDelay(1000 / portTICK_RATE_MS);
 	    }
 
 }

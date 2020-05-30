@@ -10,6 +10,24 @@
 #include <stdlib.h>
 #include <string.h>
 
+/* Temporary- Delete later
+	//test IEEE conversion
+	float ave_temp = 38.4;
+	uint8_t temp_measurement[4] = { '\0' }; //Tempearature is in Centigrade unit
+	        uint8_t BLE_measurement[5] = { '\0' }; //Tempearature is in Centigrade unit
+	        BLE_measurement[0] = 0x00;
+
+	        float2IEEE11073(ave_temp, temp_measurement);
+
+	        for (uint8_t xx = 0; xx < 4; xx++) BLE_measurement[xx+1] = temp_measurement[xx];
+	        for (uint8_t xx = 0; xx < 5; xx++)
+	        {
+	        	ESP_LOGI(TAG, "BLE bytes: %x\r\n",BLE_measurement[xx]);
+	        }
+	//test IEEE conversion
+
+*/
+
 uint32_t float2IEEE11073(double data, uint8_t output[4])
 {
   uint32_t result = MDER_NaN;
