@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* Temporary- Delete later
+/* Temporary- #TODO Delete later
 	//test IEEE conversion
 	float ave_temp = 38.4;
 	uint8_t temp_measurement[4] = { '\0' }; //Tempearature is in Centigrade unit

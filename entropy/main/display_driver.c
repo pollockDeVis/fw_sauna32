@@ -18,7 +18,7 @@
 #include "freertos/task.h"
 #include "esp_ota_ops.h"
 
-static const char *TAG = "display_driver";
+static const char *TAG = __FILE__;
 
 //check this for UI design https://doc.embedded-wizard.de/getting-started-esp-wrover-kit
 //ESP Camera Module with QR code scanning: https://www.hackster.io/news/using-a-camera-with-the-esp32-9d6994b34a2b
@@ -103,12 +103,10 @@ void display_driver_init()
 			.flags=LB_SPI_DEVICE_HALFDUPLEX,        // ALWAYS SET  to HALF DUPLEX MODE!! for display spi
 	    };
 
-	    //vTaskDelay(500 / portTICK_RATE_MS);
 
 		// ==== Initialize the SPI bus and attach the LCD to the SPI bus ====
 		ret=spi_lobo_bus_add_device(SPI_BUS, &buscfg, &devcfg, &spi);
 	    assert(ret==ESP_OK);
-		ESP_LOGI("TAG","SPI: display device added to spi bus (%d)\r\n", SPI_BUS);
 		tft_disp_spi = spi;
 
 		// ==== Test select/deselect ====
@@ -117,21 +115,12 @@ void display_driver_init()
 		ret = spi_lobo_device_deselect(spi);
 	    assert(ret==ESP_OK);
 
-	    ESP_LOGI("TAG","SPI: attached display device, speed=%u\r\n", spi_lobo_get_speed(spi));
-	    ESP_LOGI("TAG","SPI: bus uses native pins: %s\r\n", spi_lobo_uses_native_pins(spi) ? "true" : "false");
-
 		// ==== Initialize the Display ====
-	    ESP_LOGI("TAG","SPI: display init...\r\n");
 		TFT_display_init();
 
 	#ifdef TFT_START_COLORS_INVERTED
 		TFT_invertDisplay(1);
 	#endif
-
-
-//		// ---- Detect maximum read speed ----
-//		tft_max_rdclock = find_rd_speed();
-//		ESP_LOGI("TAG","SPI: Max rd speed = %u\r\n", tft_max_rdclock);
 
 	    // ==== Set SPI clock used for display operations ====
 		spi_lobo_set_speed(spi, DEFAULT_SPI_CLOCK);
@@ -139,7 +128,6 @@ void display_driver_init()
 		TFT_setGammaCurve(DEFAULT_GAMMA_CURVE);
 		TFT_setRotation(LANDSCAPE);
 		TFT_resetclipwin();
-
 
 
 }
@@ -150,8 +138,6 @@ void display_start_page()
 		int tempy = TFT_getfontheight() + 4;
 		tft_fg = TFT_ORANGE;
 		TFT_print("Sauna32 Lite", CENTER, (tft_dispWin.y2-tft_dispWin.y1)/2 - tempy);
-		ESP_LOGI("TAG","offset %d", (tft_dispWin.y2-tft_dispWin.y1)/2 - tempy);
-		ESP_LOGI("TAG","tempy %d", tempy);
 
 		TFT_setFont(UBUNTU16_FONT, NULL);
 		tft_fg = TFT_CYAN;
@@ -198,7 +184,6 @@ void display_generic_message()
 			int tempy = TFT_getfontheight() - 25;
 			tft_fg = TFT_WHITE;
 			char* tmp_buff =  "Measuring Temperature";
-			//sprintf(tmp_buff,);
 			TFT_print(tmp_buff, CENTER, (tft_dispWin.y2-tft_dispWin.y1)/2 - tempy - 20);
 
 }

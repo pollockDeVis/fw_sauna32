@@ -15,7 +15,7 @@
 #include "freertos/task.h"
 #include "esp_log.h"
 
-static const char *TAG = "temp_driver";
+static const char *TAG = __FILE__;
 
 void temp_driver_init()
 {

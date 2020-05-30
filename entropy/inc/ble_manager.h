@@ -1,37 +1,54 @@
 /*
- * ble_manager.h
- *
- *  Created on: May 27, 2020
- *      Author: Pollock
- */
+	File Name: ble_manager.h
+	Author: Sadequr Rahman
+	Date: 29/05/2020
+	Description:
+*/
 
-#ifndef INC_BLE_MANAGER_H_
-#define INC_BLE_MANAGER_H_
+#ifndef _BLE_MANAGER_H_
+#define _BLE_MANAGER_H_
+
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/event_groups.h"
+#include "esp_system.h"
+#include "esp_bt.h"
+#include "esp_gap_ble_api.h"
+#include "esp_gatts_api.h"
+#include "esp_bt_main.h"
+#include "esp_gatt_common_api.h"
 
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
+typedef struct {
+    esp_gatts_cb_t gatts_cb;
+    uint16_t gatts_if;
+    uint16_t app_id;
+    uint16_t conn_id;
+    uint16_t service_handle;
+    esp_gatt_srvc_id_t service_id;
+    uint16_t char_handle;
+    esp_bt_uuid_t char_uuid;
+    esp_gatt_perm_t perm;
+    esp_gatt_char_prop_t property;
+    uint16_t descr_handle;
+    esp_bt_uuid_t descr_uuid;
+}gatts_profile_inst_t;
 
-/* Attributes State Machine */
-enum
-{
-    IDX_SVC,
-    IDX_CHAR_A,
-    IDX_CHAR_VAL_A,
-    IDX_CHAR_CFG_A,
-
-    IDX_CHAR_B,
-    IDX_CHAR_VAL_B,
-
-    IDX_CHAR_C,
-    IDX_CHAR_VAL_C,
-
-    HRS_IDX_NB,
-};
 
 void ble_manager_init(void);
+esp_err_t ble_manager_setDeviceName(const char* deviceName);
+const char* ble_manager_getDeviceName(void);
+
+// gap
+esp_ble_adv_data_t * ble_manager_getDefaultAdvData(void);
+esp_ble_adv_params_t * ble_manager_getDefaultAdvertiseParam(void);
+esp_ble_adv_data_t * ble_manager_getDefaultAdvRespData(void);
+void ble_manager_setAdvParams(esp_ble_adv_params_t* param);
+esp_err_t ble_manager_setAdvData(esp_ble_adv_data_t* advData);
+esp_err_t ble_manager_setAdvRespData(esp_ble_adv_data_t* scanRespData);
+//gatt
 
 
-#endif /* INC_BLE_MANAGER_H_ */
+
+#endif /* _BLE_MANAGER_H_ */

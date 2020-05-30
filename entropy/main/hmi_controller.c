@@ -4,7 +4,7 @@
  *  Created on: May 29, 2020
  *      Author: Pollock
  */
-
+#define FEVER_TEMPERATURE_THRESHOLD     37.3
 
 /*
  * 	display_start_page();

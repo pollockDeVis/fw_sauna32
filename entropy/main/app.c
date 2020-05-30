@@ -12,9 +12,9 @@
 #include "buzzer.h"
 #include "IEEE11073float.h"
 
-#define FEVER_TEMPERATURE_THRESHOLD     37.3
 
-static const char *TAG = "app";
+
+static const char *TAG = __FILE__;
 
 
 void app_main()
@@ -28,13 +28,23 @@ void app_main()
         ret = nvs_flash_init();
     }
     ESP_ERROR_CHECK( ret );
-    ble_manager_init();
 	temp_driver_init();
 	display_driver_init();
 	display_start_page();
 
+	ble_manager_init();
+	ble_manager_setDeviceName("SAUNA32 Lite");
+	esp_ble_adv_data_t *advData = ble_manager_getDefaultAdvData();
+	esp_ble_adv_params_t *advParams = ble_manager_getDefaultAdvertiseParam();
+	esp_ble_adv_data_t *scanResp = ble_manager_getDefaultAdvRespData();
+
+	ble_manager_setAdvParams(advParams);
+	ble_manager_setAdvRespData(scanResp);
+	ble_manager_setAdvData(advData);
+
 	  while (1)
 	    {
+		  ESP_LOGI(TAG, "This is a test");
 		  vTaskDelay(1000 / portTICK_RATE_MS);
 	    }
 
