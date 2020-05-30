@@ -13,6 +13,7 @@ set(SOURCES
 "buzzer.c"
 "hmi_controller.c"
 "sensor_manager.c"
+"IEEE11073float.c"
 )
 idf_component_register(
         SRCS ${SOURCES}
