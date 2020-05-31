@@ -13,8 +13,6 @@
 #include "ble_manager.h"
 
 
-static const char *TAG = __FILE__;
-
 
 void app_main()
 {
@@ -32,6 +30,7 @@ void app_main()
 	esp_ble_adv_data_t *advData = ble_manager_getDefaultAdvData();
 	esp_ble_adv_params_t *advParams = ble_manager_getDefaultAdvertiseParam();
 	esp_ble_adv_data_t *scanResp = ble_manager_getDefaultAdvRespData();
+
 
 	ble_manager_setAdvParams(advParams);
 	ble_manager_setAdvRespData(scanResp);

@@ -14,9 +14,6 @@
 #include <string.h>
 
 
-#define GAP_SERVICE_UUID   0x1800
-#define GATTS_NUM_HANDLE   4
-
 #define GAP_SERVICE_ID  0
 
 static const char *TAG = __FILE__;
@@ -36,9 +33,8 @@ static uint8_t adv_service_uuid128[32] = {
 };
 
 
+
 //gatt
-
-
 
 
 void ble_manager_init()
@@ -267,7 +263,6 @@ void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp
                  param->connect.conn_id,
                  param->connect.remote_bda[0], param->connect.remote_bda[1], param->connect.remote_bda[2],
                  param->connect.remote_bda[3], param->connect.remote_bda[4], param->connect.remote_bda[5]);
-        //gl_profile_tab[PROFILE_A_APP_ID].conn_id = param->connect.conn_id;
         //start sent the update connection parameters to the peer device.
         esp_ble_gap_update_conn_params(&conn_params);
         break;
@@ -279,4 +274,5 @@ void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp
     default:
         break;
     }
+
 }
