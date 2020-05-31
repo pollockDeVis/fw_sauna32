@@ -12,9 +12,14 @@
 #include "buzzer.h"
 #include "IEEE11073float.h"
 
+#include <stdlib.h>
+#include <string.h>
+
 
 
 static const char *TAG = __FILE__;
+uint8_t temp_buf[4];
+float temp = 10.25;
 
 
 void app_main()
@@ -28,6 +33,8 @@ void app_main()
         ret = nvs_flash_init();
     }
     ESP_ERROR_CHECK( ret );
+	memset((void*)temp_buf,0,4);
+	
 	temp_driver_init();
 	display_driver_init();
 	display_start_page();
@@ -44,8 +51,13 @@ void app_main()
 
 	  while (1)
 	    {
-		  ESP_LOGI(TAG, "This is a test");
+		  //ESP_LOGI(TAG, "This is a test");
 		  vTaskDelay(1000 / portTICK_RATE_MS);
+		  memcpy((void*)temp_buf,(void*)&temp, sizeof(temp));
+		  ble_manager_send_indication(temp_buf, 4);
+		  // to update actual value
+		  //temp = temp_driver_get_amb_temp();
+		  temp += 1.0;
 	    }
 
 }
