@@ -35,13 +35,6 @@ uint8_t notify_data[15];
 //gap
 esp_ble_adv_params_t* adv_params = NULL;
 
-//static uint8_t adv_service_uuid128[32] = {
-//    /* LSB <--------------------------------------------------------------------------------> MSB */
-//    //first uuid, 16bit, [12],[13] is the value
-//    0xfb, 0x34, 0x9b, 0x5f, 0x80, 0x00, 0x00, 0x80, 0x00, 0x10, 0x00, 0x00, 0xEE, 0x00, 0x00, 0x00,
-//    //second uuid, 32bit, [12], [13], [14], [15] is the value
-//    0xfb, 0x34, 0x9b, 0x5f, 0x80, 0x00, 0x00, 0x80, 0x00, 0x10, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00,
-//};
 
 static uint8_t adv_service_uuid128[16] = {
     /* LSB <--------------------------------------------------------------------------------> MSB */
@@ -70,12 +63,9 @@ static const uint16_t GATTS_CHAR_UUID         = 0x2A1C; //Temperature Measuremen
 static const uint16_t primary_service_uuid         = ESP_GATT_UUID_PRI_SERVICE;
 static const uint16_t character_declaration_uuid   = ESP_GATT_UUID_CHAR_DECLARE;
 static const uint16_t character_client_config_uuid = ESP_GATT_UUID_CHAR_CLIENT_CONFIG;
-//static const uint8_t char_prop_read                =  ESP_GATT_CHAR_PROP_BIT_READ;
-//static const uint8_t char_prop_write               = ESP_GATT_CHAR_PROP_BIT_WRITE;
 static const uint8_t char_prop_read_write_notify   = ESP_GATT_CHAR_PROP_BIT_WRITE | ESP_GATT_CHAR_PROP_BIT_READ | ESP_GATT_CHAR_PROP_BIT_NOTIFY;
 static const uint8_t health_thermometer_ccc[2]      = {0x00, 0x00};
-static const uint8_t char_value[5]                 = {0x00, 0x00, 0x00, 0x0C, 0x84};//{0x00, 0x40, 0x3B, 0x25, 0xFB};
-//0, 0, 0, 12, 132]
+static const uint8_t char_value[5]                 = {0x00, 0x00, 0x00, 0x0C, 0x84};
 
 /* Full Database Description - Used to add attributes into the database */
 static const esp_gatts_attr_db_t gatt_db[HT_IDX_NB] =
@@ -103,20 +93,10 @@ static const esp_gatts_attr_db_t gatt_db[HT_IDX_NB] =
 
 };
 
-// static void throughput_server_task(void *param)
-// {
-//     while(1) {
-//     	if (can_send_notify && is_connect){
-//     		esp_ble_gatts_send_indicate(health_thermometer_profile_tab[THERMOMETER_PROFILE_APP_IDX].gatts_if, health_thermometer_profile_tab[THERMOMETER_PROFILE_APP_IDX].conn_id, health_thermometer_handle_table[HT_CHAR_VAL],
-//                                                 sizeof(notify_data), notify_data, false);
-//     	}
-//     	vTaskDelay(500 / portTICK_PERIOD_MS);
-//     }
-// }
-
 static void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param)
 {
     switch (event) {
+
         case ESP_GATTS_REG_EVT:
         {
             esp_err_t create_attr_ret = esp_ble_gatts_create_attr_tab(gatt_db, gatts_if, HT_IDX_NB, SVC_INST_ID);
@@ -140,13 +120,11 @@ static void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_
                         ESP_LOGI(TAG, "notify enable");
                         can_send_notify = true;
 
-                        for (int i = 0; i < sizeof(notify_data); ++i)
+                        for (int i = 0; i < sizeof(notify_data); ++i) //#TODO check functionality and remove
                         {
                             notify_data[i] = i % 0xff;
                         }
-                        //the size of notify_data[] need less than MTU size
-                       // esp_ble_gatts_send_indicate(gatts_if, param->write.conn_id, health_thermometer_handle_table[HT_CHAR_VAL], //commented out
-                                               // sizeof(notify_data), notify_data, false); //commented out
+
                     }else if (descr_value == 0x0002){
                         ESP_LOGI(TAG, "indicate enable");
                         uint8_t indicate_data[15];
@@ -154,9 +132,7 @@ static void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_
                         {
                             indicate_data[i] = i % 0xff;
                         }
-                        //the size of indicate_data[] need less than MTU size
-                        // esp_ble_gatts_send_indicate(gatts_if, param->write.conn_id, health_thermometer_handle_table[HT_CHAR_VAL],
-                        //                     sizeof(indicate_data), indicate_data, true);
+
                     }
                     else if (descr_value == 0x0000){
                     	can_send_notify =false;
@@ -212,24 +188,6 @@ static void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_
             esp_ble_gap_update_conn_params(&conn_params);
 			break;
 
-        //    case ESP_GATTS_CONNECT_EVT: {
-        //    	is_connect = true;
-        //        esp_ble_conn_update_params_t conn_params = {0};
-        //        memcpy(conn_params.bda, param->connect.remote_bda, sizeof(esp_bd_addr_t));
-        //        /* For the IOS system, please reference the apple official documents about the ble connection parameters restrictions. */
-        //        conn_params.latency = 0;
-        //        conn_params.max_int = 0x20;    // max_int = 0x20*1.25ms = 40ms
-        //        conn_params.min_int = 0x10;    // min_int = 0x10*1.25ms = 20ms
-        //        conn_params.timeout = 400;    // timeout = 400*10ms = 4000ms
-        //        ESP_LOGI(TAG, "ESP_GATTS_CONNECT_EVT, conn_id %d, remote %02x:%02x:%02x:%02x:%02x:%02x:",
-        //                 param->connect.conn_id,
-        //                 param->connect.remote_bda[0], param->connect.remote_bda[1], param->connect.remote_bda[2],
-        //                 param->connect.remote_bda[3], param->connect.remote_bda[4], param->connect.remote_bda[5]);
-        //        //gl_profile_tab[PROFILE_A_APP_ID].conn_id = param->connect.conn_id;
-        //        //start sent the update connection parameters to the peer device.
-        //        esp_ble_gap_update_conn_params(&conn_params);
-        //        break;
-        //    }
          case ESP_GATTS_DISCONNECT_EVT:
             is_connect = false;
                 ESP_LOGI(TAG, "ESP_GATTS_DISCONNECT_EVT, reason = 0x%x", param->disconnect.reason);
@@ -497,61 +455,6 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
 
     } while (0);
 }
-
-//void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param)
-//{
-//    switch (event)
-//    {
-//    case ESP_GATTS_CONNECT_EVT: {
-//    	is_connect = true;
-//        esp_ble_conn_update_params_t conn_params = {0};
-//        memcpy(conn_params.bda, param->connect.remote_bda, sizeof(esp_bd_addr_t));
-//        /* For the IOS system, please reference the apple official documents about the ble connection parameters restrictions. */
-//        conn_params.latency = 0;
-//        conn_params.max_int = 0x20;    // max_int = 0x20*1.25ms = 40ms
-//        conn_params.min_int = 0x10;    // min_int = 0x10*1.25ms = 20ms
-//        conn_params.timeout = 400;    // timeout = 400*10ms = 4000ms
-//        ESP_LOGI(TAG, "ESP_GATTS_CONNECT_EVT, conn_id %d, remote %02x:%02x:%02x:%02x:%02x:%02x:",
-//                 param->connect.conn_id,
-//                 param->connect.remote_bda[0], param->connect.remote_bda[1], param->connect.remote_bda[2],
-//                 param->connect.remote_bda[3], param->connect.remote_bda[4], param->connect.remote_bda[5]);
-//        //gl_profile_tab[PROFILE_A_APP_ID].conn_id = param->connect.conn_id;
-//        //start sent the update connection parameters to the peer device.
-//        esp_ble_gap_update_conn_params(&conn_params);
-//        break;
-//    }
-//    case ESP_GATTS_REG_EVT: {
-//    	if (param->reg.status == ESP_GATT_OK)
-//    	{
-//    		health_thermometer_profile_tab[THERMOMETER_PROFILE_APP_IDX].gatts_if = gatts_if;
-//    	        } else {
-//    	            ESP_LOGE(TAG, "reg app failed, app_id %04x, status %d",
-//    	                    param->reg.app_id,
-//    	                    param->reg.status);
-//    	            return;
-//    	 }
-//
-//        do {
-//                if (gatts_if == ESP_GATT_IF_NONE || /* ESP_GATT_IF_NONE, not specify a certain gatt_if, need to call every profile cb function */
-//                gatts_if == health_thermometer_profile_tab[THERMOMETER_PROFILE_APP_IDX].gatts_if) {
-//                    if (health_thermometer_profile_tab[THERMOMETER_PROFILE_APP_IDX].gatts_cb) {
-//                    	health_thermometer_profile_tab[THERMOMETER_PROFILE_APP_IDX].gatts_cb(event, gatts_if, param);
-//                    }
-//                }
-//
-//        } while (0);
-//
-//    }
-//    	break;
-//    case ESP_GATTS_DISCONNECT_EVT:
-//    	is_connect = false;
-//        ESP_LOGI(TAG, "ESP_GATTS_DISCONNECT_EVT, disconnect reason 0x%x", param->disconnect.reason);
-//        esp_ble_gap_start_advertising(adv_params);
-//        break;
-//    default:
-//        break;
-//    }
-//}
 
 void example_prepare_write_event_env(esp_gatt_if_t gatts_if, prepare_type_env_t *prepare_write_env, esp_ble_gatts_cb_param_t *param)
 {

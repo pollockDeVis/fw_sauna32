@@ -30,7 +30,7 @@ static void temp_data_filter_task(void *param)
 		{
 			filtered_temp_float = sensor_filter_get_filtered_data(tmp); //Update the temperature static variable
 			uint8_t temp_measurement[4] = { '\0' };
-			float2IEEE11073(filtered_temp_float, temp_measurement);
+			float2IEEE11073(filtered_temp_float, temp_measurement); //maybe can be done on the BLE end since it is util
 			for (uint8_t i = 0; i < 4; i++) filtered_temp_IEEE11073[i+1] = temp_measurement[i];
 			//Trigger Events -> BLE & Display (optional-> need to check)
 			ESP_LOGI("TAG", "filtered_temp_float is %lf \r\n", filtered_temp_float) ;
@@ -49,19 +49,4 @@ void sensor_manager_init()
 	xTaskCreate(temp_data_filter_task, "Data Acquisition Task", 1024*4, NULL, configMAX_PRIORITIES-3, &sensorManagerDataHandle);
 }
 
-	//float last_avg = 0;
-	//uint8_t sample_size = 100;
-
-	//
-	//			for(uint8_t i = 0 ; i <= sample_size; ++i)
-	//			{
-	//				to = temp_driver_get_obj_temp();
-	//				sensor_filter_put_raw_data(tmp, to);
-	//				//ESP_LOGI("TAG", "%d \r\n", i) ;
-	//				vTaskDelay(10 / portTICK_RATE_MS);
-	//			}
-	//			float avg = sensor_filter_get_filtered_data(tmp);
-	//			ESP_LOGI("TAG", "Average is %lf \r\n", avg) ;
-	//			ESP_LOGI("TAG", "Gradient is %lf \r\n", avg-last_avg ) ;
-	//			last_avg = avg;
 
