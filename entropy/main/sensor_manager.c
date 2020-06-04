@@ -6,14 +6,17 @@
  */
 #include "sensor_manager.h"
 #include "esp_log.h"
+#include "MessageQueue.h"
 
 TaskHandle_t sensorManagerDataHandle = NULL;
+
+static const char *TAG = __FILE__;
 
 float filtered_temp_float = 0.0; //static make it and test
 uint8_t filtered_temp_IEEE11073[IEEE_TEMP_BUFF_LEN] = { '\0' }; //static
 
 
-const char* TAG = __FILE__;
+
 
 static void temp_data_filter_task(void *param)
 {
@@ -29,11 +32,16 @@ static void temp_data_filter_task(void *param)
 		if(sample_count > SENSOR_SAMPLE_SIZE)
 		{
 			filtered_temp_float = sensor_filter_get_filtered_data(tmp); //Update the temperature static variable
-			uint8_t temp_measurement[4] = { '\0' };
-			float2IEEE11073(filtered_temp_float, temp_measurement); //maybe can be done on the BLE end since it is util
-			for (uint8_t i = 0; i < 4; i++) filtered_temp_IEEE11073[i+1] = temp_measurement[i];
-			//Trigger Events -> BLE & Display (optional-> need to check)
-			ESP_LOGI("TAG", "filtered_temp_float is %lf \r\n", filtered_temp_float) ;
+			//ESP_LOGI(TAG, "filtered_temp_float is %lf \r\n", filtered_temp_float) ;
+
+            if(MessageQueue_IsValid()){
+            	msg_t *m = (msg_t*) heap_caps_malloc(sizeof(msg_t), MALLOC_CAP_DEFAULT);
+            	m->src = sensor;
+            	m->msg = (void*)&filtered_temp_float;
+            	MessageQueue_Send(m);
+            	heap_caps_free(m);
+            }
+
 			sample_count = 0;
 		}
 

@@ -11,7 +11,6 @@
 #include "temp_driver.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "IEEE11073float.h"
 #include "sensor_filter.h"
 
 #define SENSOR_SAMPLE_SIZE			50

@@ -11,7 +11,6 @@ set(SOURCES
 "custom_list.c"
 "MessageQueue.c"
 "buzzer.c"
-"hmi_controller.c"
 "sensor_manager.c"
 "IEEE11073float.c"
 )

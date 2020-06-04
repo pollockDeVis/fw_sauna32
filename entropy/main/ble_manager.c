@@ -12,6 +12,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include "MessageQueue.h"
+#include "IEEE11073float.h"
 
 #define GAP_SERVICE_UUID   0x1800
 #define GATTS_NUM_HANDLE   4
@@ -171,6 +173,14 @@ static void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_
         case ESP_GATTS_CONNECT_EVT:
             is_connect = true;
 
+            if(MessageQueue_IsValid()){
+            	msg_t *m = (msg_t*) heap_caps_malloc(sizeof(msg_t), MALLOC_CAP_DEFAULT);
+            	m->src = bluetooth;
+            	m->msg = (void*)&is_connect;
+            	MessageQueue_Send(m);
+            	heap_caps_free(m);
+            }
+
             esp_ble_conn_update_params_t conn_params = {0};
             memcpy(conn_params.bda, param->connect.remote_bda, sizeof(esp_bd_addr_t));
             /* For the iOS system, please refer to Apple official documents about the BLE connection parameters restrictions. */
@@ -190,6 +200,14 @@ static void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_
 
          case ESP_GATTS_DISCONNECT_EVT:
             is_connect = false;
+
+            if(MessageQueue_IsValid()){
+            	msg_t *m = (msg_t*) heap_caps_malloc(sizeof(msg_t), MALLOC_CAP_DEFAULT);
+            	m->src = bluetooth;
+            	m->msg = (void*)&is_connect;
+            	MessageQueue_Send(m);
+            	heap_caps_free(m);
+            }
                 ESP_LOGI(TAG, "ESP_GATTS_DISCONNECT_EVT, reason = 0x%x", param->disconnect.reason);
                 esp_ble_gap_start_advertising(adv_params);
             break;
@@ -222,7 +240,20 @@ static void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_
     }
 }
 
+static void sensor_data_callback(void *msg) {
+	//ESP_LOGI(TAG, "FLOAT Val : %lf\r\n", *((float* )msg));
 
+	uint8_t temp_measurement[BLE_TEMP_BUFF_SIZE - 1] = { '\0' }; //Tempearature is in Centigrade unit
+	uint8_t BLE_measurement[BLE_TEMP_BUFF_SIZE] = { '\0' }; //Tempearature is in Centigrade unit
+	BLE_measurement[0] = 0x00; //Flag
+
+	float2IEEE11073(*((float*) msg), temp_measurement);
+
+	for (uint8_t i = 0; i < (BLE_TEMP_BUFF_SIZE - 1); i++)
+		BLE_measurement[i + 1] = temp_measurement[i];
+
+	ble_manager_send_indication(BLE_measurement, BLE_TEMP_BUFF_SIZE);
+}
 
 void ble_manager_init()
 {
@@ -277,7 +308,16 @@ void ble_manager_init()
     }
     ESP_LOGI(TAG, "Register to gap service");
 
+    ble_manager_setDeviceName(BLE_DEVICE_NAME);
+    	esp_ble_adv_data_t *advData = ble_manager_getDefaultAdvData();
+    	esp_ble_adv_params_t *advParams = ble_manager_getDefaultAdvertiseParam();
+    	esp_ble_adv_data_t *scanResp = ble_manager_getDefaultAdvRespData();
 
+    	ble_manager_setAdvParams(advParams);
+    	ble_manager_setAdvRespData(scanResp);
+    	ble_manager_setAdvData(advData);
+
+	MessageQueue_RegisterMsg(sensor, sensor_data_callback);
 }
 
 esp_ble_adv_params_t* ble_manager_getDefaultAdvertiseParam(void)

@@ -12,13 +12,12 @@
 
 
 #define MAX_MSG			200
-#define	MSG_QUEUE_LEN	50
+#define	MSG_QUEUE_LEN	32
 
 typedef void(*msgQueueCallback_t)(void *mMsg);
 
 typedef enum {
-	temp = 0,
-	proximity,
+	sensor = 0,
 	uart,
 	bluetooth,
 	MAX_MSG_SRC

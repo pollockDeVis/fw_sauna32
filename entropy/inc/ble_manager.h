@@ -22,13 +22,14 @@
 //GATT Application Profiles
 #define THERMOMETER_PROFILE_NUM					1
 #define THERMOMETER_PROFILE_APP_IDX				0
-#define THERMOMETER_APP_ID						0x55 //USER DEFINED
+#define THERMOMETER_APP_ID						0xDF //USER DEFINED
 #define SVC_INST_ID                 			0
+#define BLE_DEVICE_NAME   						"SAUNA32 Lite"
 
 #define GATTS_DEMO_CHAR_VAL_LEN_MAX 			500
 #define PREPARE_BUF_MAX_SIZE        			1024
 #define CHAR_DECLARATION_SIZE       			(sizeof(uint8_t))
-
+#define BLE_TEMP_BUFF_SIZE						5
 //GATT Profile
 
 enum

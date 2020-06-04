@@ -15,6 +15,14 @@
 #define SPI_MAX_CLOCK_FREQ			8000000
 #define SPI_MAX_DATA_TRANSFER_SIZE  6*1024
 // ==========================================================
+#define FEVER_TEMPERATURE_THRESHOLD     37.3
+#define DISPLAY_BLE_DISCONNECTED_MSG	"BLE DISCONNECTED"
+#define DISPLAY_BLE_CONNECTED_MSG		"BLE CONNECTED"
+#define DISPLAY_ERROR_MSG				"ERROR!"
+#define DISPLAY_DEVICE_NAME    			"SAUNA32 Lite"
+#define	DISPLAY_POWERED_BY				"Powered by"
+#define	DISPLAY_DF						"Digital Forest"
+
 void display_driver_default_header(char *info);
 void display_driver_error_header(char *hdr, char *ftr);
 void display_driver_init();

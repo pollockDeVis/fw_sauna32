@@ -17,9 +17,10 @@
 #include "esp_log.h"
 #include "freertos/task.h"
 #include "esp_ota_ops.h"
+#include "MessageQueue.h"
 
 static const char *TAG = __FILE__;
-
+static char* print_buff[20];
 //check this for UI design https://doc.embedded-wizard.de/getting-started-esp-wrover-kit
 //ESP Camera Module with QR code scanning: https://www.hackster.io/news/using-a-camera-with-the-esp32-9d6994b34a2b
 //---------------------------------
@@ -39,7 +40,7 @@ void display_driver_default_header(char *info)
 	TFT_fillRect(0, tft_height-TFT_getfontheight()-9, tft_width-1, TFT_getfontheight()+8, TFT_NAVY);
 	TFT_drawRect(0, tft_height-TFT_getfontheight()-9, tft_width-1, TFT_getfontheight()+8, TFT_NAVY);
 
-	TFT_print("BLE CONNECTED", CENTER, 4);
+	TFT_print(DISPLAY_DEVICE_NAME, CENTER, 4);
 	TFT_print(info, CENTER, tft_height-TFT_getfontheight()-5);
 	tft_bg = TFT_BLACK;
 	TFT_setclipwin(0,TFT_getfontheight()+9, tft_width-1, tft_height-TFT_getfontheight()-10);
@@ -48,7 +49,6 @@ void display_driver_default_header(char *info)
 //---------------------------------------------
 void display_driver_error_header(char *hdr, char *ftr)
 {
-
 
 	TFT_saveClipWin();
 	TFT_resetclipwin();
@@ -72,11 +72,25 @@ void display_driver_error_header(char *hdr, char *ftr)
 		else TFT_print(ftr, CENTER, tft_height-TFT_getfontheight()-5);
 	}
 
-
+	tft_bg = TFT_BLACK;
 
 	TFT_restoreClipWin();
 }
 
+static void ble_status_callback(void *msg) {
+	if (*((bool* )msg) == true)
+		display_driver_default_header(print_buff);
+	else if (*((bool* )msg) == false)
+	{
+		display_refresh();
+		display_driver_error_header(DISPLAY_BLE_DISCONNECTED_MSG, DISPLAY_ERROR_MSG);
+	}
+}
+
+static void sensor_update_callback(void *msg) {
+	//ESP_LOGI(TAG, "FLOAT Val : %lf\r\n", *((float* )msg));
+	display_temperature(*((float* )msg), FEVER_TEMPERATURE_THRESHOLD);
+}
 void display_driver_init()
 {
 	    esp_err_t ret;
@@ -128,7 +142,11 @@ void display_driver_init()
 		TFT_setGammaCurve(DEFAULT_GAMMA_CURVE);
 		TFT_setRotation(LANDSCAPE);
 		TFT_resetclipwin();
-
+		display_start_page();
+		display_refresh();
+		display_driver_error_header(DISPLAY_BLE_DISCONNECTED_MSG, DISPLAY_ERROR_MSG);
+		MessageQueue_RegisterMsg(bluetooth, ble_status_callback);
+		MessageQueue_RegisterMsg(sensor, sensor_update_callback);
 
 }
 
@@ -137,17 +155,16 @@ void display_start_page()
 	TFT_setFont(DEJAVU24_FONT, NULL); //DEJAVU18_FONT
 		int tempy = TFT_getfontheight() + 4;
 		tft_fg = TFT_ORANGE;
-		TFT_print("Sauna32 Lite", CENTER, (tft_dispWin.y2-tft_dispWin.y1)/2 - tempy);
+		TFT_print(DISPLAY_DEVICE_NAME, CENTER, (tft_dispWin.y2-tft_dispWin.y1)/2 - tempy);
 
 		TFT_setFont(UBUNTU16_FONT, NULL);
 		tft_fg = TFT_CYAN;
-		TFT_print("Powered by", CENTER, (tft_dispWin.y2-tft_dispWin.y1)/2 + tempy-20);
-		TFT_print("Digital Forest", CENTER, (tft_dispWin.y2-tft_dispWin.y1)/2 + tempy);
+		TFT_print(DISPLAY_POWERED_BY, CENTER, (tft_dispWin.y2-tft_dispWin.y1)/2 + tempy-20);
+		TFT_print(DISPLAY_DF, CENTER, (tft_dispWin.y2-tft_dispWin.y1)/2 + tempy);
 		vTaskDelay(2000 / portTICK_RATE_MS);
 		esp_app_desc_t *app_info = esp_ota_get_app_description();
-		char* print_buff[20];
-		sprintf(print_buff, "sauna32 %s", app_info->version);
-		display_driver_default_header(print_buff);
+		sprintf(print_buff, "SAUNA 32 %s", app_info->version);
+
 
 }
 
@@ -192,8 +209,5 @@ void display_refresh()
 {
 	TFT_fillScreen(TFT_BLACK);
 	TFT_resetclipwin();
-	//check state
-
-	display_driver_default_header("test");
 }
 
