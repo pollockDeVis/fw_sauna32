@@ -12,6 +12,13 @@ TaskHandle_t sensorManagerDataHandle = NULL;
 
 static const char *TAG = __FILE__;
 
+//Equation Params
+float c = 60.1;
+float b = -2.76;
+float a = 0.0312;
+float Tc_offset = 0.0;
+//Equation Params
+
 float filtered_temp_float = 0.0; //static make it and test
 uint8_t filtered_temp_IEEE11073[IEEE_TEMP_BUFF_LEN] = { '\0' }; //static
 
@@ -33,7 +40,11 @@ static void temp_data_filter_task(void *param)
 		{
 			filtered_temp_float = sensor_filter_get_filtered_data(tmp); //Update the temperature static variable
 			//ESP_LOGI(TAG, "filtered_temp_float is %lf \r\n", filtered_temp_float) ;
-
+			if(filtered_temp_float >= 32.0 && filtered_temp_float <= 40.0)
+				Tc_offset = c + b*filtered_temp_float + a*(filtered_temp_float*filtered_temp_float);
+			else
+				Tc_offset = 0.0;
+			filtered_temp_float = filtered_temp_float + Tc_offset;
             if(MessageQueue_IsValid()){
             	msg_t *m = (msg_t*) heap_caps_malloc(sizeof(msg_t), MALLOC_CAP_DEFAULT);
             	m->src = sensor;
