@@ -10,7 +10,7 @@
 #include "sensor_manager.h"
 #include "display_driver.h"
 #include "MessageQueue.h"
-
+#include "esp_flash_encrypt.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -30,6 +30,17 @@ void app_main()
     }
 
     ESP_ERROR_CHECK( ret );
+    //startup logs
+    ESP_LOGI(TAG, "[APP] IDF version: %s", esp_get_idf_version());
+
+        esp_flash_enc_mode_t mode = esp_get_flash_encryption_mode();
+        if (mode == ESP_FLASH_ENC_MODE_DISABLED) {
+        	ESP_LOGI(TAG,"Flash encryption feature is disabled\n");
+        } else {
+        	ESP_LOGI(TAG,"Flash encryption feature is enabled in %s mode\n",
+                mode == ESP_FLASH_ENC_MODE_DEVELOPMENT ? "DEVELOPMENT" : "RELEASE");
+        }
+
 	MessageQueue_Init(MSG_QUEUE_LEN);
 	display_driver_init();
 	ble_manager_init();

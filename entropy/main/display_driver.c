@@ -163,7 +163,7 @@ void display_start_page()
 		TFT_print(DISPLAY_DF, CENTER, (tft_dispWin.y2-tft_dispWin.y1)/2 + tempy);
 		vTaskDelay(2000 / portTICK_RATE_MS);
 		esp_app_desc_t *app_info = esp_ota_get_app_description();
-		sprintf(print_buff, "SAUNA 32 %s", app_info->version);
+		sprintf(print_buff, "Version %s", app_info->version);
 
 
 }
