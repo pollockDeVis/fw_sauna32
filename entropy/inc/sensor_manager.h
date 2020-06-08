@@ -16,6 +16,8 @@
 #define SENSOR_SAMPLE_SIZE			50
 #define SENSOR_SAMPLING_TIME_MS		5
 #define IEEE_TEMP_BUFF_LEN			5
+#define BODY_TEMPERATURE_MAX		40.0
+#define BODY_TEMPERATURE_MIN		30.0
 void sensor_manager_init(void);
 
 

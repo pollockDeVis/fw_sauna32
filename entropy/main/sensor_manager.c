@@ -13,10 +13,11 @@ TaskHandle_t sensorManagerDataHandle = NULL;
 static const char *TAG = __FILE__;
 
 //Equation Params
-float c = 60.1;
-float b = -2.76;
-float a = 0.0312;
+float c = 52.0;
+float b = -2.27;
+float a = 0.0239;
 float Tc_offset = 0.0;
+float static_distance_comp = 0.0;
 //Equation Params
 
 float filtered_temp_float = 0.0; //static make it and test
@@ -40,8 +41,8 @@ static void temp_data_filter_task(void *param)
 		{
 			filtered_temp_float = sensor_filter_get_filtered_data(tmp); //Update the temperature static variable
 			//ESP_LOGI(TAG, "filtered_temp_float is %lf \r\n", filtered_temp_float) ;
-			if(filtered_temp_float >= 32.0 && filtered_temp_float <= 40.0)
-				Tc_offset = c + b*filtered_temp_float + a*(filtered_temp_float*filtered_temp_float);
+			if(filtered_temp_float >= BODY_TEMPERATURE_MIN && filtered_temp_float <= BODY_TEMPERATURE_MAX)
+				Tc_offset = c + b*filtered_temp_float + a*(filtered_temp_float*filtered_temp_float) + static_distance_comp;
 			else
 				Tc_offset = 0.0;
 			filtered_temp_float = filtered_temp_float + Tc_offset;
