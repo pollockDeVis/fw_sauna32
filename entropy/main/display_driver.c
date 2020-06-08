@@ -140,7 +140,7 @@ void display_driver_init()
 		spi_lobo_set_speed(spi, DEFAULT_SPI_CLOCK);
 		ESP_LOGI("TAG","SPI: Changed speed to %u\r\n", spi_lobo_get_speed(spi));
 		TFT_setGammaCurve(DEFAULT_GAMMA_CURVE);
-		TFT_setRotation(LANDSCAPE);
+		TFT_setRotation(LANDSCAPE_FLIP);
 		TFT_resetclipwin();
 		display_start_page();
 		display_refresh();
