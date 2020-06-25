@@ -23,6 +23,7 @@
 #define THERMOMETER_PROFILE_NUM					1
 #define THERMOMETER_PROFILE_APP_IDX				0
 #define THERMOMETER_APP_ID						0xDF //USER DEFINED
+#define THERMOMETER_APP_WRT_VAL					0x4644
 #define SVC_INST_ID                 			0
 #define BLE_DEVICE_NAME   						"SAUNA32 Lite"
 

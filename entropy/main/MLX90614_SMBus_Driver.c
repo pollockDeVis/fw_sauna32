@@ -64,7 +64,7 @@ int MLX90614_SMBusRead(uint8_t slaveAddr, uint8_t reg_addr, uint16_t *data){
     } else if (ret == ESP_ERR_TIMEOUT) {
         ESP_LOGW(TAG, "Bus is busy");
     } else {
-        ESP_LOGW(TAG, "Read failed");
+       // ESP_LOGW(TAG, "Read failed");
     }
     if (pec != recived_data[2]) //comparing last packet with calculated PEC
     {
