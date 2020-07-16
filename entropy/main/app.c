@@ -16,7 +16,7 @@
 
 
 static const char *TAG = __FILE__;
-
+#include "led.h"
 
 void app_main()
 {
@@ -40,7 +40,8 @@ void app_main()
         	ESP_LOGI(TAG,"Flash encryption feature is enabled in %s mode\n",
                 mode == ESP_FLASH_ENC_MODE_DEVELOPMENT ? "DEVELOPMENT" : "RELEASE");
         }
-
+    led_init();
+    led_on();
 	MessageQueue_Init(MSG_QUEUE_LEN);
 	display_driver_init();
 	ble_manager_init();

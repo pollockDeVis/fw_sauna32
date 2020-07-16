@@ -13,6 +13,7 @@ set(SOURCES
 "buzzer.c"
 "sensor_manager.c"
 "IEEE11073float.c"
+"led.c"
 )
 idf_component_register(
         SRCS ${SOURCES}
