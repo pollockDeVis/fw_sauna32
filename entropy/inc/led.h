@@ -18,8 +18,10 @@
 #include "driver/gpio.h"
 #define LED_PIN (GPIO_NUM_23)
 
-void led_off();
+void led_blink_off();
+void led_blink_on();
 void led_on();
+void led_off();
 void led_init();
 
 

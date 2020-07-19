@@ -12,13 +12,20 @@ TaskHandle_t sensorManagerDataHandle = NULL;
 
 static const char *TAG = __FILE__;
 
-//Equation Params
-float c = 53.7;
-float b = -2.36;
-float a = 0.025;
-float Tc_offset = 0.0;
-float static_distance_comp = 2.985;
-//Equation Params
+#define ENABLE_CALIBRATION
+
+#ifdef ENABLE_CALIBRATION
+	//Equation Params
+	float Tc_offset = 0.0;
+	float c = 53.7;
+	float b = -2.36;
+	float a = 0.025;
+	float static_distance_comp = 0.0;//2.985;
+	//Equation Params
+#else
+	float static_distance_comp = 0.0;
+	float Tc_offset = 0.0;
+#endif
 
 float filtered_temp_float = 0.0; //static make it and test
 uint8_t filtered_temp_IEEE11073[IEEE_TEMP_BUFF_LEN] = { '\0' }; //static
@@ -40,11 +47,12 @@ static void temp_data_filter_task(void *param)
 		if(sample_count > SENSOR_SAMPLE_SIZE)
 		{
 			filtered_temp_float = sensor_filter_get_filtered_data(tmp) +  static_distance_comp; //Update the temperature static variable
-			//ESP_LOGI(TAG, "filtered_temp_float is %lf \r\n", filtered_temp_float) ;
+#ifdef ENABLE_CALIBRATION
 			if(filtered_temp_float >= BODY_TEMPERATURE_MIN && filtered_temp_float <= BODY_TEMPERATURE_MAX)
 				Tc_offset = c + b*filtered_temp_float + a*(filtered_temp_float*filtered_temp_float);
 			else
 				Tc_offset = 0.0;
+#endif
 			filtered_temp_float = filtered_temp_float + Tc_offset;
             if(MessageQueue_IsValid()){
             	msg_t *m = (msg_t*) heap_caps_malloc(sizeof(msg_t), MALLOC_CAP_DEFAULT);

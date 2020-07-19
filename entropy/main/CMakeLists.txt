@@ -1,6 +1,5 @@
 set(SOURCES 
 "app.c"
-"display_driver.c"
 "MLX90614_SMBus_Driver.c"
 "MLX90614_API.c"
 "temp_driver.c"
@@ -10,7 +9,6 @@ set(SOURCES
 "custom_list_node.c"
 "custom_list.c"
 "MessageQueue.c"
-"buzzer.c"
 "sensor_manager.c"
 "IEEE11073float.c"
 "led.c"

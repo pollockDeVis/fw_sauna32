@@ -8,7 +8,6 @@
 #include "nvs_flash.h"
 #include "ble_manager.h"
 #include "sensor_manager.h"
-#include "display_driver.h"
 #include "MessageQueue.h"
 #include "esp_flash_encrypt.h"
 #include <stdlib.h>
@@ -40,12 +39,11 @@ void app_main()
         	ESP_LOGI(TAG,"Flash encryption feature is enabled in %s mode\n",
                 mode == ESP_FLASH_ENC_MODE_DEVELOPMENT ? "DEVELOPMENT" : "RELEASE");
         }
-    led_init();
-    led_on();
+
 	MessageQueue_Init(MSG_QUEUE_LEN);
-	display_driver_init();
 	ble_manager_init();
     sensor_manager_init(); //maybe should be after BLE
+    led_init();
 
 
 }
