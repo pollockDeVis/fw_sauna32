@@ -29,6 +29,7 @@ const char* advName = NULL;
 
 uint16_t health_thermometer_handle_table[HT_IDX_NB];
 
+uint8_t ble_system_activate_flag = false;
 bool is_connect = false;
 bool can_send_notify = false;
 uint8_t notify_data[15];
@@ -114,8 +115,22 @@ static void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_
         case ESP_GATTS_WRITE_EVT:
             if (!param->write.is_prep){
                 // the data length of gattc write  must be less than GATTS_DEMO_CHAR_VAL_LEN_MAX.
-                ESP_LOGI(TAG, "GATT_WRITE_EVT, handle = %d, value len = %d, value :", param->write.handle, param->write.len);
+                //ESP_LOGI(TAG, "GATT_WRITE_EVT, handle = %d, value len = %d, value :", param->write.handle, param->write.len);
                 esp_log_buffer_hex(TAG, param->write.value, param->write.len);
+                uint16_t app_write = param->write.value[1]<<8 | param->write.value[0];
+                if (app_write == THERMOMETER_APP_WRT_VAL)
+                {
+                	//ESP_LOGI(TAG, "JAILAM'S CODE!!");
+                	ble_system_activate_flag = 1;
+                	if(MessageQueue_IsValid()){
+                	            	msg_t *m = (msg_t*) heap_caps_malloc(sizeof(msg_t), MALLOC_CAP_DEFAULT);
+                	            	m->src = ble_system_activate;
+                	            	m->msg = (void*)&ble_system_activate_flag;
+                	            	MessageQueue_Send(m);
+                	            	heap_caps_free(m);
+                	            }
+                }
+
                 if (health_thermometer_handle_table[HT_CHAR_CFG] == param->write.handle && param->write.len == 2){
                     uint16_t descr_value = param->write.value[1]<<8 | param->write.value[0];
                     if (descr_value == 0x0001){
@@ -139,7 +154,10 @@ static void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_
                     else if (descr_value == 0x0000){
                     	can_send_notify =false;
                         ESP_LOGI(TAG, "notify/indicate disable ");
-                    }else{
+                    }
+
+                    	else{
+
                         ESP_LOGE(TAG, "unknown descr value");
                         esp_log_buffer_hex(TAG, param->write.value, param->write.len);
                     }
@@ -161,13 +179,13 @@ static void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_
             example_exec_write_event_env(&prepare_write_env, param);
             break;
         case ESP_GATTS_MTU_EVT:
-            ESP_LOGI(TAG, "ESP_GATTS_MTU_EVT, MTU %d", param->mtu.mtu);
+           // ESP_LOGI(TAG, "ESP_GATTS_MTU_EVT, MTU %d", param->mtu.mtu);
             break;
         case ESP_GATTS_CONF_EVT:
-            ESP_LOGI(TAG, "ESP_GATTS_CONF_EVT, status = %d, attr_handle %d", param->conf.status, param->conf.handle);
+           // ESP_LOGI(TAG, "ESP_GATTS_CONF_EVT, status = %d, attr_handle %d", param->conf.status, param->conf.handle);
             break;
         case ESP_GATTS_START_EVT:
-            ESP_LOGI(TAG, "SERVICE_START_EVT, status %d, service_handle %d", param->start.status, param->start.service_handle);
+           // ESP_LOGI(TAG, "SERVICE_START_EVT, status %d, service_handle %d", param->start.status, param->start.service_handle);
             break;
 
         case ESP_GATTS_CONNECT_EVT:
@@ -251,8 +269,8 @@ static void sensor_data_callback(void *msg) {
 
 	for (uint8_t i = 0; i < (BLE_TEMP_BUFF_SIZE - 1); i++)
 		BLE_measurement[i + 1] = temp_measurement[i];
-
-	ble_manager_send_indication(BLE_measurement, BLE_TEMP_BUFF_SIZE);
+    if(ble_system_activate_flag)
+    	ble_manager_send_indication(BLE_measurement, BLE_TEMP_BUFF_SIZE);
 }
 
 void ble_manager_init()

@@ -20,6 +20,7 @@ typedef enum {
 	sensor = 0,
 	uart,
 	bluetooth,
+	ble_system_activate,
 	MAX_MSG_SRC
 }msg_src_t;
 

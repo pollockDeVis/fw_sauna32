@@ -21,6 +21,7 @@
 
 static const char *TAG = __FILE__;
 static char* print_buff[20];
+bool display_activate_temperature = false;
 //check this for UI design https://doc.embedded-wizard.de/getting-started-esp-wrover-kit
 //ESP Camera Module with QR code scanning: https://www.hackster.io/news/using-a-camera-with-the-esp32-9d6994b34a2b
 //---------------------------------
@@ -87,9 +88,16 @@ static void ble_status_callback(void *msg) {
 	}
 }
 
+static void ble_activate_callback(void *msg) {
+	if (*((bool* )msg) == true)
+		display_activate_temperature = true;
+
+}
+
 static void sensor_update_callback(void *msg) {
 	//ESP_LOGI(TAG, "FLOAT Val : %lf\r\n", *((float* )msg));
-	display_temperature(*((float* )msg), FEVER_TEMPERATURE_THRESHOLD);
+	if (display_activate_temperature)
+		display_temperature(*((float* )msg), FEVER_TEMPERATURE_THRESHOLD);
 }
 void display_driver_init()
 {
@@ -147,6 +155,8 @@ void display_driver_init()
 		display_driver_error_header(DISPLAY_BLE_DISCONNECTED_MSG, DISPLAY_ERROR_MSG);
 		MessageQueue_RegisterMsg(bluetooth, ble_status_callback);
 		MessageQueue_RegisterMsg(sensor, sensor_update_callback);
+		MessageQueue_RegisterMsg(ble_system_activate, ble_activate_callback);
+
 
 }
 
